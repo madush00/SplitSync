@@ -173,9 +173,11 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getDatabase, ref, set, get, onValue, push, update, remove } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
+        // Firebase 12.7.0 version with updated imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+        import { getDatabase, ref, set, get, onValue, push, update, remove } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
+        // Your Firebase configuration (same as before)
         const firebaseConfig = {
             apiKey: "AIzaSyCCjPlbM_3tujVYtuUa2Ig_sVyS2wa4N1c",
             authDomain: "simple-chat-4f05c.firebaseapp.com",
@@ -186,6 +188,7 @@
             appId: "1:788588013054:web:c44fb4a22664963fee0caf"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
