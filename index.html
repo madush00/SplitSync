@@ -898,6 +898,7 @@
                 <li class="nav-link" data-page="payment">💰 ගෙවීම</li>
                 <li class="nav-link" data-page="receipts">📥 ලැබීම්</li>
                 <li class="nav-link" data-page="history">📜 History</li>
+                <li class="nav-link" data-page="bills">📄 බිල්පත</li>
                 <li class="nav-link" data-page="settings">⚙️ සැකසුම්</li>
             </ul>
         </nav>
@@ -1246,6 +1247,114 @@
         </div>
     </div>
 
+    <!-- Bills Page -->
+    <div id="bills" class="page">
+        <div class="container">
+            <div class="header">
+                <h1>බිල්පත් කළමනාකරණය</h1>
+                <p class="subtitle">ඔබගේ බිල්පත් upload කර සුරකින්න</p>
+            </div>
+
+            <div class="form-card">
+                <h2 style="margin-bottom: 20px; font-size: 1.5rem;">නව බිල්පතක් එකතු කරන්න</h2>
+                <form id="bill-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="bill-date">දිනය</label>
+                            <input type="date" id="bill-date" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="bill-buyer">ගෙවූ පුද්ගලයා</label>
+                            <select id="bill-buyer" class="form-select" required>
+                                <option value="">තෝරන්න...</option>
+                                <option value="Jeewan">ජීවන්</option>
+                                <option value="Sachin">සචින්</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="bill-shop">වෙළඳසැල</label>
+                            <select id="bill-shop" class="form-select" required>
+                                <option value="">තෝරන්න...</option>
+                                <option value="월드푸드">월드푸드</option>
+                                <option value="대농">대농</option>
+                                <option value="통진">통진</option>
+                                <option value="농협">농협</option>
+                                <option value="වෙනත්">වෙනත්</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="bill-amount">මුදල (₩)</label>
+                            <input type="number" id="bill-amount" class="form-input" placeholder="10000" required min="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="bill-type">වර්ගය</label>
+                            <select id="bill-type" class="form-select" required>
+                                <option value="">තෝරන්න...</option>
+                                <option value="Shared">හවුල්</option>
+                                <option value="Personal">පෞද්ගලික</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="bill-description">විස්තරය</label>
+                            <input type="text" id="bill-description" class="form-input" placeholder="උදා: සතිපතා මිලදී ගැනීම්">
+                        </div>
+
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label class="form-label" for="bill-file">බිල්පත් ඡායාරූපය</label>
+                            <input type="file" id="bill-file" class="form-input" accept="image/*,application/pdf" style="padding: 10px;">
+                            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 8px;">
+                                📷 ඡායාරූප (JPG, PNG) හෝ PDF ගොනු පමණක්
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">💾 බිල්පත සුරකින්න</button>
+                        <button type="button" class="btn btn-secondary" onclick="resetBillForm()">🔄 නැවත සකසන්න</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="table-card">
+                <div class="table-header">
+                    <h2 class="table-title">සුරකින ලද බිල්පත්</h2>
+                </div>
+
+                <div class="table-container">
+                    <table class="transaction-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>දිනය</th>
+                                <th>ගෙවූ පුද්ගලයා</th>
+                                <th>වෙළඳසැල</th>
+                                <th>මුදල</th>
+                                <th>වර්ගය</th>
+                                <th>විස්තරය</th>
+                                <th>බිල්පත</th>
+                                <th>ක්‍රියාව</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bills-table-body">
+                            <!-- Bills will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="bills-empty-state" class="empty-state" style="display: none;">
+                    <div class="empty-state-icon">📄</div>
+                    <h3 class="empty-state-title">බිල්පත් නොමැත</h3>
+                    <p class="empty-state-text">ඔබගේ පළමු බිල්පත upload කිරීමෙන් ආරම්භ කරන්න!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Settings Page -->
     <div id="settings" class="page">
         <div class="container">
@@ -1303,6 +1412,7 @@
     <script>
         // Global State
         let transactions = [];
+        let bills = [];
         let jeewanSharedBalance = 0;
         let sachinSharedBalance = 0;
         let jeewanPersonalTotal = 0;
@@ -1316,6 +1426,7 @@
             setupFilterButtons();
             setupExpenseForm();
             setupPaymentForm();
+            setupBillForm();
             setupDatePicker();
             updateUI();
         });
@@ -1342,9 +1453,11 @@
         function setupDatePicker() {
             const dateInput = document.getElementById('date');
             const paymentDateInput = document.getElementById('payment-date');
+            const billDateInput = document.getElementById('bill-date');
             const today = new Date().toISOString().split('T')[0];
             dateInput.value = today;
             paymentDateInput.value = today;
+            billDateInput.value = today;
             
             flatpickr(dateInput, {
                 dateFormat: 'Y-m-d',
@@ -1352,6 +1465,11 @@
             });
             
             flatpickr(paymentDateInput, {
+                dateFormat: 'Y-m-d',
+                maxDate: 'today'
+            });
+            
+            flatpickr(billDateInput, {
                 dateFormat: 'Y-m-d',
                 maxDate: 'today'
             });
@@ -1400,6 +1518,109 @@
             document.getElementById('payment-form').reset();
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('payment-date').value = today;
+        }
+
+        // Bill Form Submission
+        function setupBillForm() {
+            document.getElementById('bill-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const date = document.getElementById('bill-date').value;
+                const buyer = document.getElementById('bill-buyer').value;
+                const shop = document.getElementById('bill-shop').value;
+                const amount = parseInt(document.getElementById('bill-amount').value);
+                const type = document.getElementById('bill-type').value;
+                const description = document.getElementById('bill-description').value;
+                const fileInput = document.getElementById('bill-file');
+                
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(event) {
+                        const billData = {
+                            id: Date.now(),
+                            date,
+                            buyer,
+                            shop,
+                            amount,
+                            type,
+                            description,
+                            fileName: file.name,
+                            fileType: file.type,
+                            fileData: event.target.result
+                        };
+                        
+                        bills.push(billData);
+                        
+                        // Also add to transactions
+                        addTransaction(date, buyer, shop, amount, type, description);
+                        
+                        saveToLocalStorage();
+                        updateUI();
+                        showToast('බිල්පත සාර්ථකව එකතු කරන ලදී!', 'success');
+                        resetBillForm();
+                    };
+                    
+                    reader.readAsDataURL(file);
+                } else {
+                    showToast('කරුණාකර බිල්පත් ගොනුවක් තෝරන්න', 'error');
+                }
+            });
+        }
+
+        function resetBillForm() {
+            document.getElementById('bill-form').reset();
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('bill-date').value = today;
+        }
+
+        function deleteBill(billId) {
+            showModal(
+                'බිල්පත මකන්න',
+                'මෙම බිල්පත මකා දැමීමට අවශ්‍ය බව විශ්වාසද?',
+                () => {
+                    const index = bills.findIndex(b => b.id === billId);
+                    if (index !== -1) {
+                        bills.splice(index, 1);
+                        saveToLocalStorage();
+                        updateUI();
+                        showToast('බිල්පත මකා දමන ලදී', 'success');
+                    }
+                }
+            );
+        }
+
+        function viewBill(billId) {
+            const bill = bills.find(b => b.id === billId);
+            if (bill) {
+                const newWindow = window.open();
+                if (bill.fileType.startsWith('image/')) {
+                    newWindow.document.write(`
+                        <html>
+                            <head>
+                                <title>${bill.fileName}</title>
+                                <style>
+                                    body { margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #000; }
+                                    img { max-width: 100%; max-height: 100vh; }
+                                </style>
+                            </head>
+                            <body>
+                                <img src="${bill.fileData}" alt="${bill.fileName}">
+                            </body>
+                        </html>
+                    `);
+                } else if (bill.fileType === 'application/pdf') {
+                    newWindow.document.write(`
+                        <html>
+                            <head><title>${bill.fileName}</title></head>
+                            <body style="margin:0;">
+                                <iframe src="${bill.fileData}" style="width:100%;height:100vh;border:none;"></iframe>
+                            </body>
+                        </html>
+                    `);
+                }
+            }
         }
 
         // Core Transaction Logic
@@ -1523,6 +1744,7 @@
             updateBalanceCards();
             updateTransactionTable();
             updateReceiptsPage();
+            updateBillsPage();
         }
 
         function updateBalanceCards() {
@@ -1709,6 +1931,47 @@
             }).join('');
         }
 
+        function updateBillsPage() {
+            const tbody = document.getElementById('bills-table-body');
+            const emptyState = document.getElementById('bills-empty-state');
+            
+            if (bills.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            
+            tbody.innerHTML = bills.map(bill => {
+                const buyer = bill.buyer === 'Jeewan' ? 'ජීවන්' : 'සචින්';
+                const typeLabel = bill.type === 'Shared' ? 'හවුල්' : 'පෞද්ගලික';
+                const typeBadge = bill.type === 'Shared' 
+                    ? '<span class="badge badge-shared">හවුල්</span>' 
+                    : '<span class="badge badge-personal">පෞද්ගලික</span>';
+                
+                return `
+                    <tr>
+                        <td>#${bill.id.toString().slice(-4)}</td>
+                        <td>${formatDate(bill.date)}</td>
+                        <td>${buyer}</td>
+                        <td>${bill.shop}</td>
+                        <td class="amount-cell">${formatCurrency(bill.amount)}</td>
+                        <td>${typeBadge}</td>
+                        <td>${bill.description || '-'}</td>
+                        <td>
+                            <button class="btn" style="padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85rem;" onclick="viewBill(${bill.id})">
+                                👁️ බලන්න
+                            </button>
+                        </td>
+                        <td>
+                            <button class="delete-btn" onclick="deleteBill(${bill.id})">🗑️ මකන්න</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
         // Utility Functions
         function getAmountClass(amount) {
             if (amount > 0) return 'positive';
@@ -1805,9 +2068,10 @@
         function clearAllData() {
             showModal(
                 'සියලු දත්ත මකන්න',
-                'ඔබට සියලු ගනුදෙනු මැකීමට අවශ්‍ය බව විශ්වාසද? මෙම ක්‍රියාව අහෝසි කළ නොහැක.',
+                'ඔබට සියලු ගනුදෙනු සහ බිල්පත් මැකීමට අවශ්‍ය බව විශ්වාසද? මෙම ක්‍රියාව අහෝසි කළ නොහැක.',
                 () => {
                     transactions = [];
+                    bills = [];
                     jeewanSharedBalance = 0;
                     sachinSharedBalance = 0;
                     jeewanPersonalTotal = 0;
@@ -1879,6 +2143,7 @@
         function saveToLocalStorage() {
             const data = {
                 transactions,
+                bills,
                 jeewanSharedBalance,
                 sachinSharedBalance,
                 jeewanPersonalTotal,
@@ -1892,6 +2157,7 @@
             if (saved) {
                 const data = JSON.parse(saved);
                 transactions = data.transactions || [];
+                bills = data.bills || [];
                 jeewanSharedBalance = data.jeewanSharedBalance || 0;
                 sachinSharedBalance = data.sachinSharedBalance || 0;
                 jeewanPersonalTotal = data.jeewanPersonalTotal || 0;
