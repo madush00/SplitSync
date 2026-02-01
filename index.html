@@ -1,2648 +1,1685 @@
 <!DOCTYPE html>
-<html lang="si">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ජීවන් සහ සචින් - මාසික වියදම් බෙදීම් ගණකය</title>
+    <title>SplitSync - Jeewan & Sachin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Add Flatpickr CSS for calendar -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
+        :root {
+            --primary: #0f172a;
+            --secondary: #1e293b;
+            --accent: #06b6d4;
+            --accent-dark: #0891b2;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
+            --border: #334155;
+            --card-bg: #1e293b;
+            --input-bg: #0f172a;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.6);
+        }
+
         * {
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
             margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
-            color: #333;
-            line-height: 1.6;
-            min-height: 100vh;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at center, rgba(6, 182, 212, 0.03) 0%, transparent 70%);
+            animation: rotate 30s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            background-color: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            padding: 40px;
-            border: 1px solid #e1e8ed;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
         }
-        
+
+        /* Header */
         .header {
             text-align: center;
-            margin-bottom: 40px;
-            padding-bottom: 25px;
-            border-bottom: 3px solid #4a6fa5;
-            background: linear-gradient(90deg, #f8faff 0%, #ffffff 100%);
-            border-radius: 15px;
-            padding: 25px;
-        }
-        
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-            font-size: 2.5rem;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-        }
-        
-        .subtitle {
-            color: #4a6fa5;
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-        
-        .friends-container {
-            display: flex;
-            justify-content: center;
-            gap: 50px;
-            margin-top: 25px;
-            flex-wrap: wrap;
-        }
-        
-        .friend-card {
-            background: linear-gradient(145deg, #ffffff 0%, #f8faff 100%);
-            border-radius: 15px;
-            padding: 25px;
-            width: 240px;
-            text-align: center;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
+            padding: 40px 0 20px;
             position: relative;
-            overflow: hidden;
         }
-        
-        .friend-card:before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: #4a6fa5;
+
+        .header h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, var(--accent) 0%, #38bdf8 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            animation: fadeInDown 0.6s ease-out;
         }
-        
-        .friend-card.active {
-            border-color: #4a6fa5;
-            transform: translateY(-5px);
-            box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+            letter-spacing: 0.05em;
+            animation: fadeInUp 0.6s ease-out 0.1s both;
         }
-        
-        .friend-name {
-            font-size: 1.6rem;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-        
-        .sachin {
-            color: #e74c3c;
-        }
-        
-        .jeevan {
-            color: #3498db;
-        }
-        
-        .friend-avatar {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            background-color: #ddd;
-            margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            color: white;
-            font-weight: bold;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .sachin-avatar {
-            background: linear-gradient(145deg, #e74c3c 0%, #c0392b 100%);
-        }
-        
-        .jeevan-avatar {
-            background: linear-gradient(145deg, #3498db 0%, #2980b9 100%);
-        }
-        
-        .dashboard {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 35px;
-            margin-bottom: 40px;
-        }
-        
-        @media (max-width: 1100px) {
-            .dashboard {
-                grid-template-columns: 1fr;
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
-        
-        .section {
-            margin-bottom: 35px;
-            padding: 30px;
-            border-radius: 15px;
-            background: linear-gradient(145deg, #f8faff 0%, #ffffff 100%);
-            border: 1px solid #e1e8ed;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        
-        .section.full-width {
-            grid-column: 1 / -1;
-        }
-        
-        h2 {
-            color: #4a6fa5;
-            border-bottom: 2px solid #4a6fa5;
-            padding-bottom: 12px;
-            margin-top: 0;
-            font-size: 1.6rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        h2:before {
-            content: '📊';
-            font-size: 1.4rem;
-        }
-        
-        h3 {
-            color: #2c3e50;
-            margin-top: 0;
-            font-size: 1.3rem;
-        }
-        
-        .form-row {
+
+        /* Balance Cards */
+        .balance-section {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 25px;
-            margin-bottom: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+            animation: fadeIn 0.8s ease-out 0.2s both;
         }
-        
-        .form-group {
-            margin-bottom: 25px;
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
-        
-        label {
-            display: block;
-            margin-bottom: 10px;
+
+        .balance-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 35px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .balance-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--accent);
+        }
+
+        .balance-card:hover::before {
+            opacity: 1;
+        }
+
+        .balance-card .name {
+            font-size: 1.1rem;
             font-weight: 600;
-            color: #2c3e50;
-            font-size: 15px;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            position: relative;
         }
-        
-        input, select, textarea {
-            width: 100%;
-            padding: 14px;
-            border: 1px solid #cbd5e0;
-            border-radius: 10px;
-            font-size: 16px;
-            background-color: white;
-            transition: all 0.3s;
-        }
-        
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #4a6fa5;
-            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
-        }
-        
-        button {
-            background: linear-gradient(145deg, #4a6fa5 0%, #3a5a8c 100%);
-            color: white;
-            border: none;
-            padding: 14px 28px;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
+
+        .balance-card .amount {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
             font-weight: 600;
-            box-shadow: 0 4px 10px rgba(74, 111, 165, 0.3);
+            margin: 20px 0;
+            position: relative;
+            transition: all 0.3s ease;
         }
-        
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(74, 111, 165, 0.4);
+
+        .balance-card .amount.positive {
+            color: var(--success);
+            text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
         }
-        
-        .btn-danger {
-            background: linear-gradient(145deg, #e74c3c 0%, #c0392b 100%);
-            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+
+        .balance-card .amount.negative {
+            color: var(--danger);
+            text-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
         }
-        
-        .btn-secondary {
-            background: linear-gradient(145deg, #7f8c8d 0%, #6c7b7d 100%);
-            box-shadow: 0 4px 10px rgba(127, 140, 141, 0.3);
+
+        .balance-card .amount.neutral {
+            color: var(--text-secondary);
         }
-        
-        .btn-success {
-            background: linear-gradient(145deg, #27ae60 0%, #219653 100%);
-            box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
+
+        .balance-details {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
-        .month-selector {
+
+        .balance-detail {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(145deg, #ffffff 0%, #f8faff 100%);
-            padding: 20px 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            margin-bottom: 25px;
-            border: 1px solid #e1e8ed;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
         }
-        
-        .month-nav {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+
+        .balance-detail:last-child {
+            margin-bottom: 0;
         }
-        
-        .month-nav button {
-            background: linear-gradient(145deg, #4a6fa5 0%, #3a5a8c 100%);
-            padding: 10px 18px;
-            font-size: 14px;
+
+        .balance-detail .label {
+            color: var(--text-muted);
         }
-        
-        .current-month {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #2c3e50;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+
+        .balance-detail .value {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
         }
-        
-        .expense-table {
-            width: 100%;
-            border-collapse: collapse;
+
+        .balance-detail .value.positive {
+            color: var(--success);
+        }
+
+        .balance-detail .value.negative {
+            color: var(--danger);
+        }
+
+        .balance-indicator {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-top: 10px;
+        }
+
+        /* Payment Action Button */
+        .payment-actions {
             margin-top: 20px;
-            box-shadow: 0 3px 15px rgba(0,0,0,0.05);
-            border-radius: 10px;
-            overflow: hidden;
         }
-        
-        .expense-table th {
-            background: linear-gradient(145deg, #4a6fa5 0%, #3a5a8c 100%);
-            color: white;
-            padding: 16px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 15px;
-        }
-        
-        .expense-table td {
-            padding: 16px;
-            border-bottom: 1px solid #eef2f7;
-        }
-        
-        .expense-table tr:hover {
-            background-color: #f8faff;
-        }
-        
-        .summary-table {
+
+        .payment-btn {
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 25px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 3px 15px rgba(0,0,0,0.05);
-        }
-        
-        .summary-table th {
-            background: linear-gradient(145deg, #2c3e50 0%, #1a252f 100%);
-            color: white;
-            padding: 16px;
-            text-align: left;
-            font-weight: 600;
-        }
-        
-        .summary-table td {
-            padding: 16px;
-            border-bottom: 1px solid #eef2f7;
-        }
-        
-        .summary-table .total-row {
-            font-weight: bold;
-            background: linear-gradient(145deg, #f0f7ff 0%, #e8f0ff 100%);
-        }
-        
-        .summary-cards {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 25px;
-            margin-top: 25px;
-        }
-        
-        @media (max-width: 900px) {
-            .summary-cards {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        
-        @media (max-width: 600px) {
-            .summary-cards {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .summary-card {
-            background: linear-gradient(145deg, #ffffff 0%, #f8faff 100%);
-            padding: 25px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            border: 1px solid #e1e8ed;
-            transition: transform 0.3s;
-        }
-        
-        .summary-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .summary-title {
-            font-size: 14px;
-            color: #7f8c8d;
-            margin-bottom: 10px;
-            font-weight: 500;
-        }
-        
-        .summary-value {
-            font-size: 28px;
-            font-weight: bold;
-        }
-        
-        .sachin-owes {
-            color: #e74c3c;
-        }
-        
-        .jeevan-owes {
-            color: #3498db;
-        }
-        
-        .total {
-            color: #2c3e50;
-        }
-        
-        .balance {
-            color: #27ae60;
-        }
-        
-        .delete-btn {
-            background: linear-gradient(145deg, #ff6b6b 0%, #ff5252 100%);
+            padding: 12px 20px;
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
             color: white;
             border: none;
-            border-radius: 8px;
-            padding: 8px 15px;
-            cursor: pointer;
-            font-size: 14px;
-            box-shadow: 0 2px 5px rgba(255, 107, 107, 0.3);
-        }
-        
-        .edit-btn {
-            background: linear-gradient(145deg, #3498db 0%, #2980b9 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 8px 15px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-right: 8px;
-            box-shadow: 0 2px 5px rgba(52, 152, 219, 0.3);
-        }
-        
-        .shop-tag {
-            display: inline-block;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-            margin-right: 8px;
-            font-weight: 500;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .월드푸드-tag {
-            background: linear-gradient(145deg, #e8f4fc 0%, #d6eaf8 100%);
-            color: #2980b9;
-        }
-        
-        .대농-tag {
-            background: linear-gradient(145deg, #e8f6f3 0%, #d5f4e6 100%);
-            color: #27ae60;
-        }
-        
-        .통진-tag {
-            background: linear-gradient(145deg, #fef9e7 0%, #fdebd0 100%);
-            color: #f39c12;
-        }
-        
-        .농협-tag {
-            background: linear-gradient(145deg, #f4ecf7 0%, #e8daef 100%);
-            color: #8e44ad;
-        }
-        
-        .Other-tag {
-            background: linear-gradient(145deg, #f2f4f4 0%, #e5e8e8 100%);
-            color: #7f8c8d;
-        }
-        
-        .expense-type-tag {
-            display: inline-block;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-            margin-right: 8px;
-            font-weight: 500;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .shared-tag {
-            background: linear-gradient(145deg, #e8f6f3 0%, #d5f4e6 100%);
-            color: #27ae60;
-        }
-        
-        .personal-tag {
-            background: linear-gradient(145deg, #fef9e7 0%, #fdebd0 100%);
-            color: #f39c12;
-        }
-        
-        .person-tag {
-            display: inline-block;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .sachin-tag {
-            background: linear-gradient(145deg, #fdebd0 0%, #fad7a0 100%);
-            color: #e67e22;
-        }
-        
-        .jeevan-tag {
-            background: linear-gradient(145deg, #d6eaf8 0%, #aed6f1 100%);
-            color: #2980b9;
-        }
-        
-        .tabs {
-            display: flex;
-            border-bottom: 2px solid #e0e7ff;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-            background: linear-gradient(145deg, #f8faff 0%, #ffffff 100%);
-            border-radius: 10px 10px 0 0;
-            padding: 10px 10px 0 10px;
-        }
-        
-        .tab {
-            padding: 14px 28px;
-            cursor: pointer;
-            font-weight: 600;
-            color: #7f8c8d;
-            border-bottom: 3px solid transparent;
-            margin-bottom: -3px;
-            transition: all 0.3s;
-            border-radius: 8px 8px 0 0;
-        }
-        
-        .tab.active {
-            color: #4a6fa5;
-            border-bottom: 3px solid #4a6fa5;
-            background-color: white;
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        .monthly-summary {
-            background: linear-gradient(145deg, #ffffff 0%, #f8faff 100%);
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            margin-bottom: 25px;
-            border: 1px solid #e1e8ed;
-        }
-        
-        .settlement-box {
-            background: linear-gradient(145deg, #e8f6f3 0%, #d5f4e6 100%);
-            border-left: 5px solid #27ae60;
-            padding: 25px;
-            border-radius: 12px;
-            margin-top: 25px;
-            box-shadow: 0 3px 10px rgba(39, 174, 96, 0.2);
-        }
-        
-        .settlement-box h4 {
-            margin-top: 0;
-            color: #27ae60;
-            font-size: 1.2rem;
-        }
-        
-        .currency-input {
-            position: relative;
-        }
-        
-        .currency-input:before {
-            content: "රු.";
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #7f8c8d;
-            font-weight: 500;
-            font-size: 16px;
-        }
-        
-        .currency-input input {
-            padding-left: 50px;
-        }
-        
-        .instructions {
-            background: linear-gradient(145deg, #f0f7ff 0%, #e8f0ff 100%);
-            border-left: 4px solid #4a6fa5;
-            padding: 20px 25px;
             border-radius: 10px;
-            margin-bottom: 30px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-        }
-        
-        .instructions h3 {
-            margin-top: 0;
-            color: #4a6fa5;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .instructions h3:before {
-            content: '💡';
-        }
-        
-        .instructions ul {
-            margin: 15px 0;
-            padding-left: 20px;
-        }
-        
-        .instructions li {
-            margin-bottom: 10px;
-            line-height: 1.5;
-        }
-        
-        .payment-flow {
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 20px 0;
-            font-size: 14px;
-            color: #4a6fa5;
-            font-weight: 500;
-            flex-wrap: wrap;
-        }
-        
-        .payment-flow div {
-            padding: 12px 18px;
-            background: linear-gradient(145deg, #ffffff 0%, #f8faff 100%);
-            border-radius: 8px;
-            margin: 0 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            border: 1px solid #e1e8ed;
-        }
-        
-        .payment-flow .arrow {
-            font-size: 20px;
-            color: #4a6fa5;
-        }
-        
-        .expense-type-selector {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-        
-        .expense-type-btn {
-            flex: 1;
-            padding: 20px;
-            text-align: center;
-            background: linear-gradient(145deg, #f8faff 0%, #ffffff 100%);
-            border: 2px solid #e0e7ff;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
-        }
-        
-        .expense-type-btn.active {
-            background: linear-gradient(145deg, #e8f0ff 0%, #ffffff 100%);
-            border-color: #4a6fa5;
-            color: #4a6fa5;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(74, 111, 165, 0.2);
-        }
-        
-        .expense-type-btn.shared.active {
-            background: linear-gradient(145deg, #e8f6f3 0%, #ffffff 100%);
-            border-color: #27ae60;
-            color: #27ae60;
-        }
-        
-        .expense-type-btn.personal.active {
-            background: linear-gradient(145deg, #fef9e7 0%, #ffffff 100%);
-            border-color: #f39c12;
-            color: #f39c12;
-        }
-        
-        .quick-add-buttons {
-            display: flex;
-            gap: 12px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .quick-add-btn {
-            padding: 10px 18px;
-            background: linear-gradient(145deg, #f0f7ff 0%, #ffffff 100%);
-            border: 1px solid #cbd5e0;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        
-        .quick-add-btn:hover {
-            background: linear-gradient(145deg, #e0e7ff 0%, #ffffff 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-        }
-        
-        .shop-selector {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .shop-btn {
-            padding: 12px 20px;
-            background: linear-gradient(145deg, #f8faff 0%, #ffffff 100%);
-            border: 2px solid #e0e7ff;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        
-        .shop-btn.active {
-            background: linear-gradient(145deg, #e8f0ff 0%, #ffffff 100%);
-            border-color: #4a6fa5;
-            color: #4a6fa5;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(74, 111, 165, 0.2);
-        }
-        
-        .shop-btn.월드푸드.active {
-            background: linear-gradient(145deg, #e8f4fc 0%, #ffffff 100%);
-            border-color: #2980b9;
-            color: #2980b9;
-        }
-        
-        .shop-btn.대농.active {
-            background: linear-gradient(145deg, #e8f6f3 0%, #ffffff 100%);
-            border-color: #27ae60;
-            color: #27ae60;
-        }
-        
-        .shop-btn.통진.active {
-            background: linear-gradient(145deg, #fef9e7 0%, #ffffff 100%);
-            border-color: #f39c12;
-            color: #f39c12;
-        }
-        
-        .shop-btn.농협.active {
-            background: linear-gradient(145deg, #f4ecf7 0%, #ffffff 100%);
-            border-color: #8e44ad;
-            color: #8e44ad;
-        }
-        
-        .shop-btn.Other.active {
-            background: linear-gradient(145deg, #f2f4f4 0%, #ffffff 100%);
-            border-color: #7f8c8d;
-            color: #7f8c8d;
-        }
-        
-        .equal-share-notice {
-            background: linear-gradient(145deg, #e8f6f3 0%, #d5f4e6 100%);
-            border-left: 4px solid #27ae60;
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            color: #27ae60;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
             gap: 10px;
         }
-        
-        .equal-share-notice:before {
-            content: '⚖️';
-            font-size: 20px;
+
+        .payment-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
         }
-        
-        .month-total-section {
-            background: linear-gradient(145deg, #ffffff 0%, #f8faff 100%);
+
+        .payment-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Status Banner */
+        .status-banner {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--card-bg) 100%);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 25px 35px;
+            text-align: center;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+            animation: slideIn 0.6s ease-out 0.3s both;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .status-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .status-banner .icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .status-banner .message {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .status-banner .submessage {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        /* Form Section */
+        .form-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 40px 0;
+            animation: fadeIn 0.8s ease-out 0.4s both;
+        }
+
+        .form-section h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .form-section h2::before {
+            content: '';
+            width: 4px;
+            height: 30px;
+            background: linear-gradient(180deg, var(--accent), transparent);
+            border-radius: 2px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 14px 18px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-group input[type="number"] {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Flatpickr Customization */
+        .flatpickr-calendar {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .flatpickr-day {
+            color: var(--text-primary);
+        }
+
+        .flatpickr-day:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .flatpickr-day.selected {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .flatpickr-current-month {
+            color: var(--text-primary);
+        }
+
+        .flatpickr-weekday {
+            color: var(--text-secondary);
+        }
+
+        .flatpickr-time input {
+            color: var(--text-primary);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Outfit', sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--input-bg);
+            transform: translateY(-3px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .quick-action-btn {
+            padding: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .quick-action-btn:hover {
+            background: var(--secondary);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        /* Transactions Table */
+        .transactions-section {
+            margin: 50px 0;
+            animation: fadeIn 1s ease-out 0.5s both;
+        }
+
+        .transactions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .transactions-header h2 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .transactions-header h2::before {
+            content: '';
+            width: 4px;
+            height: 30px;
+            background: linear-gradient(180deg, var(--accent), transparent);
+            border-radius: 2px;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background: var(--secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .table-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .transaction-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .transaction-table thead {
+            background: var(--secondary);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .transaction-table th {
+            padding: 18px 20px;
+            text-align: left;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .transaction-table td {
+            padding: 20px;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.3);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .transaction-table tbody tr {
+            transition: all 0.2s ease;
+            animation: slideInRow 0.5s ease-out backwards;
+        }
+
+        .transaction-table tbody tr:nth-child(1) { animation-delay: 0.1s; }
+        .transaction-table tbody tr:nth-child(2) { animation-delay: 0.15s; }
+        .transaction-table tbody tr:nth-child(3) { animation-delay: 0.2s; }
+        .transaction-table tbody tr:nth-child(4) { animation-delay: 0.25s; }
+        .transaction-table tbody tr:nth-child(5) { animation-delay: 0.3s; }
+
+        @keyframes slideInRow {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .transaction-table tbody tr:hover {
+            background: rgba(6, 182, 212, 0.05);
+        }
+
+        .transaction-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .type-shared {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .type-personal {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .type-payment {
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--accent);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+
+        .amount-cell {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .balance-positive {
+            color: var(--success);
+        }
+
+        .balance-negative {
+            color: var(--danger);
+        }
+
+        .balance-neutral {
+            color: var(--text-muted);
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+        }
+
+        .delete-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+            opacity: 1;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state .icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
             border-radius: 12px;
             padding: 25px;
-            margin-bottom: 30px;
-            border: 2px solid #e1e8ed;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: all 0.3s ease;
         }
-        
-        .month-total-section h3 {
-            margin-top: 0;
-            color: #4a6fa5;
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent);
+        }
+
+        .stat-card .label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent);
+            padding: 20px 25px;
+            border-radius: 10px;
+            box-shadow: var(--shadow-xl);
+            transform: translateX(400px);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            max-width: 350px;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left-color: var(--success);
+        }
+
+        .toast.error {
+            border-left-color: var(--danger);
+        }
+
+        .toast .toast-content {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 15px;
         }
-        
-        .month-total-section h3:before {
-            content: '💰';
+
+        .toast .toast-icon {
+            font-size: 1.5rem;
         }
-        
-        .month-total-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+
+        .toast .toast-message {
+            flex: 1;
+            color: var(--text-primary);
+            font-weight: 500;
         }
-        
-        .month-total-item {
-            background: linear-gradient(145deg, #f8faff 0%, #ffffff 100%);
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #e1e8ed;
-        }
-        
-        .month-total-label {
-            font-size: 14px;
-            color: #7f8c8d;
-            margin-bottom: 8px;
-        }
-        
-        .month-total-value {
-            font-size: 24px;
-            font-weight: bold;
-        }
-        
+
+        /* Responsive */
         @media (max-width: 768px) {
             .container {
-                padding: 20px;
+                padding: 15px;
             }
-            
-            .friends-container {
+
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .balance-section {
+                grid-template-columns: 1fr;
                 gap: 20px;
             }
-            
-            .friend-card {
-                width: 100%;
-                max-width: 280px;
+
+            .form-section {
+                padding: 25px;
             }
-            
-            .section {
-                padding: 20px;
-            }
-            
-            .month-selector {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .month-total-grid {
+
+            .form-grid {
                 grid-template-columns: 1fr;
             }
+
+            .table-container {
+                overflow-x: auto;
+            }
+
+            .transaction-table {
+                min-width: 800px;
+            }
+
+            .toast {
+                right: 15px;
+                left: 15px;
+                max-width: none;
+            }
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.show .modal {
+            transform: scale(1);
+        }
+
+        .modal h3 {
+            font-size: 1.8rem;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+
+        .modal p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>ජීවන් සහ සචින් - මාසික වියදම් බෙදීම් ගණකය</h1>
-            <p class="subtitle">වෙළඳසැල් 4ක් සඳහා වෙන් වෙන්ව වියදම් ට්‍රැක් කර සමානව බෙදාගැනීමට</p>
-            
-            <div class="friends-container">
-                <div class="friend-card active" id="sachinCard">
-                    <div class="friend-avatar sachin-avatar">ස</div>
-                    <div class="friend-name sachin">සචින්</div>
-                    <div id="sachinBalance">ශේෂය: රු. 0</div>
-                </div>
+        <header class="header">
+            <h1>SplitSync</h1>
+            <p class="subtitle">Jeewan & Sachin · Expense Tracker</p>
+        </header>
+
+        <!-- Balance Cards -->
+        <section class="balance-section">
+            <div class="balance-card">
+                <div class="name">Jeewan</div>
+                <div class="amount neutral" id="jeewan-amount">₩0</div>
+                <div class="balance-indicator" id="jeewan-indicator">Balanced</div>
                 
-                <div class="friend-card" id="jeevanCard">
-                    <div class="friend-avatar jeevan-avatar">ජ</div>
-                    <div class="friend-name jeevan">ජීවන්</div>
-                    <div id="jeevanBalance">ශේෂය: රු. 0</div>
-                </div>
-            </div>
-        </div>
-        <div class="equal-share-notice">
-            ⚖️ සියලුම ගෘහ භාවිතයන් සඳහා වියදම් දෙදෙනාටම සමානව බෙදේ (50-50)
-        </div>
-        
-        <div class="month-selector">
-            <div class="month-nav">
-                <button id="prevMonthBtn">&lt; පෙර මාසය</button>
-                <button id="todayMonthBtn">මෙම මාසය</button>
-            </div>
-            <div class="current-month" id="currentMonthDisplay">මාසය</div>
-            <div class="month-nav">
-                <button id="nextMonthBtn">ඊළඟ මාසය &gt;</button>
-                <select id="jumpToMonth" style="width: 200px; padding: 10px; border-radius: 8px;">
-                    <option value="">වෙනත් මාසයකට යන්න</option>
-                </select>
-            </div>
-        </div>
-        
-        <div class="tabs">
-            <div class="tab active" data-tab="add">➕ වියදම් එකතු කරන්න</div>
-            <div class="tab" data-tab="current">📅 මෙම මාසයේ වියදම්</div>
-            <div class="tab" data-tab="all">📊 සියලු වියදම්</div>
-            <div class="tab" data-tab="shops">🏪 වෙළඳසැල් අනුව</div>
-            <div class="tab" data-tab="summary">📈 මාසික සාරාංශ</div>
-            <div class="tab" data-tab="payment">💰 ගෙවීම් සටහන්</div>
-        </div>
-        
-        <div class="tab-content active" id="add-tab">
-            <div class="dashboard">
-                <div class="section">
-                    <h2>නව වියදම් එකතු කරන්න</h2>
-                    
-                    <div class="expense-type-selector">
-                        <div class="expense-type-btn shared active" data-type="shared">
-                            <div>ගෘහ භාවිතය (දෙකට බෙදේ)</div>
-                            <small>දෙදෙනාම භාවිතා කරන භාණ්ඩ - 50/50 බෙදීම</small>
-                        </div>
-                        <div class="expense-type-btn personal" data-type="personal">
-                            <div>පෞද්ගලික භාවිතය (බෙදෙන්නේ නැත)</div>
-                            <small>එක් අයෙකු පමණක් භාවිතා කරන භාණ්ඩ</small>
-                        </div>
+                <div class="balance-details">
+                    <div class="balance-detail">
+                        <span class="label">Shared Balance:</span>
+                        <span class="value" id="jeewan-shared-balance">₩0</span>
                     </div>
-                    
-                    <div class="shop-selector">
-                        <div class="shop-btn 월드푸드 active" data-shop="월드푸드">월드푸드</div>
-                        <div class="shop-btn 대농" data-shop="대농">대농</div>
-                        <div class="shop-btn 통진" data-shop="통진">통진</div>
-                        <div class="shop-btn 농협" data-shop="농협">농협</div>
-                        <div class="shop-btn Other" data-shop="Other">වෙනත්</div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="expenseDate">දිනය</label>
-                            <input type="date" id="expenseDate" value="">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="paidBy">මුදල් ගෙව්වේ කා විසින්ද?</label>
-                            <select id="paidBy">
-                                <option value="Sachin">සචින්</option>
-                                <option value="Jeevan">ජීවන්</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="shopNameCustom">වෙළඳසැල් නම (වෙනත් සඳහා)</label>
-                            <input type="text" id="shopNameCustom" placeholder="වෙනත් වෙළඳසැල් නම" style="display: none;">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="expenseCategory">වර්ගය</label>
-                            <select id="expenseCategory">
-                                <option value="groceries">එළවලු/පළතුරු</option>
-                                <option value="meat">මස්/මාළු</option>
-                                <option value="dairy">කිරි භාණ්ඩ</option>
-                                <option value="grains">ධාන්‍ය/පිටි</option>
-                                <option value="cleaning">පිරිසිදු කිරීමේ ද්‍රව්‍ය</option>
-                                <option value="other">වෙනත්</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="expenseDescription">භාණ්ඩ විස්තරය</label>
-                            <textarea id="expenseDescription" placeholder="උදා: කිරි 2, බත් 5kg, තෙල් 1L, සීනි 1kg" rows="3"></textarea>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group currency-input">
-                            <label for="expenseAmount">මිල (රුපියල්)</label>
-                            <input type="number" id="expenseAmount" placeholder="උදා: 2000" min="0">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="forPerson">මෙම වියදම කා සඳහාද? (පෞද්ගලික වියදම් සඳහා පමණක්)</label>
-                            <select id="forPerson" disabled>
-                                <option value="Sachin">සචින් පමණක්</option>
-                                <option value="Jeevan">ජීවන් පමණක්</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="quick-add-buttons">
-                        <div class="quick-add-btn" data-amount="1000">රු. 1,000</div>
-                        <div class="quick-add-btn" data-amount="2000">රු. 2,000</div>
-                        <div class="quick-add-btn" data-amount="3000">රු. 3,000</div>
-                        <div class="quick-add-btn" data-amount="5000">රු. 5,000</div>
-                        <div class="quick-add-btn" data-amount="10000">රු. 10,000</div>
-                        <div class="quick-add-btn" data-amount="20000">රු. 20,000</div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 15px; margin-top: 30px;">
-                        <button id="addExpenseBtn">✅ වියදම් එකතු කරන්න</button>
-                        <button id="clearFormBtn" class="btn-secondary">🔄 ආකෘති හිස් කරන්න</button>
+                    <div class="balance-detail">
+                        <span class="label">Personal Total:</span>
+                        <span class="value" id="jeewan-personal-total">₩0</span>
                     </div>
                 </div>
                 
-                <div class="section">
-                    <h2>මෙම මාසයේ සාරාංශය</h2>
-                    <div class="summary-cards">
-                        <div class="summary-card">
-                            <div class="summary-title">මාසයේ මුළු වියදම</div>
-                            <div id="monthTotalExpense" class="summary-value total">රු. 0</div>
-                        </div>
-                        
-                        <div class="summary-card">
-                            <div class="summary-title">ගෘහ භාවිතය (දෙකට බෙදේ)</div>
-                            <div id="monthSharedExpense" class="summary-value total">රු. 0</div>
-                        </div>
-                        
-                        <div class="summary-card">
-                            <div class="summary-title">සචින් ගෙවිය යුතුයි</div>
-                            <div id="monthSachinOwes" class="summary-value sachin-owes">රු. 0</div>
-                        </div>
-                        
-                        <div class="summary-card">
-                            <div class="summary-title">ජීවන් ගෙවිය යුතුයි</div>
-                            <div id="monthJeevanOwes" class="summary-value jeevan-owes">රු. 0</div>
-                        </div>
-                    </div>
-                    
-                    <div id="monthSettlement" class="settlement-box">
-                        <h4>මෙම මාසය සඳහා ගෙවීම් සමථය</h4>
-                        <p id="monthSettlementText">තවම වියදම් නැත</p>
-                        <button id="addPaymentBtn" class="btn-success" style="margin-top: 15px;">💰 ගෙවීමක් ඇතුළත් කරන්න</button>
-                    </div>
-                    
-                    <div class="month-total-section">
-                        <h3>වෙළඳසැල් අනුව මාසික වියදම්</h3>
-                        <div class="month-total-grid" id="shopMonthlyTotals">
-                            <!-- වෙළඳසැල් අනුව මාසික වියදම් මෙතැනට එකතු වේ -->
-                        </div>
-                    </div>
+                <div class="payment-actions" id="jeewan-payment-actions" style="display: none;">
+                    <button class="payment-btn" onclick="makeQuickPayment('Jeewan', 'Sachin')" id="jeewan-payment-btn">
+                        💸 Pay Sachin
+                    </button>
                 </div>
             </div>
-        </div>
-        
-        <div class="tab-content" id="current-tab">
-            <div class="section">
-                <h2>මෙම මාසයේ වියදම්</h2>
-                <div style="overflow-x: auto;">
-                    <table class="expense-table">
-                        <thead>
-                            <tr>
-                                <th>දිනය</th>
-                                <th>වෙළඳසැල්</th>
-                                <th>විස්තර</th>
-                                <th>මිල</th>
-                                <th>ගෙව්වේ</th>
-                                <th>වර්ගය</th>
-                                <th>කා සඳහා</th>
-                                <th>ක්‍රියා</th>
-                            </tr>
-                        </thead>
-                        <tbody id="detailedMonthExpenseTable">
-                            <!-- වර්තමාන මාසයේ වියදම් මෙතැනට එකතු වේ -->
-                        </tbody>
-                    </table>
-                </div>
-                <div id="noCurrentMonthExpensesDetailed" style="text-align: center; padding: 30px; color: #7f8c8d;">
-                    මෙම මාසයට තවම වියදම් එකතු කර නැත.
-                </div>
-            </div>
-        </div>
-        
-        <div class="tab-content" id="all-tab">
-            <div class="section">
-                <h2>සියලු වියදම් (සෑම මාසයක්ම)</h2>
-                <div style="overflow-x: auto;">
-                    <table class="expense-table">
-                        <thead>
-                            <tr>
-                                <th>මාසය</th>
-                                <th>දිනය</th>
-                                <th>වෙළඳසැල්</th>
-                                <th>විස්තර</th>
-                                <th>මිල</th>
-                                <th>ගෙව්වේ</th>
-                                <th>වර්ගය</th>
-                                <th>කා සඳහා</th>
-                                <th>ක්‍රියා</th>
-                            </tr>
-                        </thead>
-                        <tbody id="allExpenseTable">
-                            <!-- සියලු වියදම් මෙතැනට එකතු වේ -->
-                        </tbody>
-                    </table>
-                </div>
-                <div id="noAllExpenses" style="text-align: center; padding: 30px; color: #7f8c8d;">
-                    තවම වියදම් එකතු කර නැත.
-                </div>
-            </div>
-        </div>
-        
-        <div class="tab-content" id="shops-tab">
-            <div class="section">
-                <h2>වෙළඳසැල් අනුව වියදම්</h2>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; margin-bottom: 30px;">
-                    <div class="shop-summary-card 월드푸드-summary" style="background: linear-gradient(145deg, #e8f4fc 0%, #d6eaf8 100%); padding: 25px; border-radius: 12px;">
-                        <h3 style="color: #2980b9; margin-top: 0;">월드푸드</h3>
-                        <div id="월드푸드-total" style="font-size: 28px; font-weight: bold; color: #2980b9;">රු. 0</div>
-                        <div style="margin-top: 15px;">
-                            <div>දෙකට බෙදීම: <span id="월드푸드-shared">රු. 0</span></div>
-                            <div>පෞද්ගලික: <span id="월드푸드-personal">රු. 0</span></div>
-                        </div>
+            <div class="balance-card">
+                <div class="name">Sachin</div>
+                <div class="amount neutral" id="sachin-amount">₩0</div>
+                <div class="balance-indicator" id="sachin-indicator">Balanced</div>
+                
+                <div class="balance-details">
+                    <div class="balance-detail">
+                        <span class="label">Shared Balance:</span>
+                        <span class="value" id="sachin-shared-balance">₩0</span>
                     </div>
-                    
-                    <div class="shop-summary-card 대농-summary" style="background: linear-gradient(145deg, #e8f6f3 0%, #d5f4e6 100%); padding: 25px; border-radius: 12px;">
-                        <h3 style="color: #27ae60; margin-top: 0;">대농</h3>
-                        <div id="대농-total" style="font-size: 28px; font-weight: bold; color: #27ae60;">රු. 0</div>
-                        <div style="margin-top: 15px;">
-                            <div>දෙකට බෙදීම: <span id="대농-shared">රු. 0</span></div>
-                            <div>පෞද්ගලික: <span id="대농-personal">රු. 0</span></div>
-                        </div>
-                    </div>
-                    
-                    <div class="shop-summary-card 통진-summary" style="background: linear-gradient(145deg, #fef9e7 0%, #fdebd0 100%); padding: 25px; border-radius: 12px;">
-                        <h3 style="color: #f39c12; margin-top: 0;">통진</h3>
-                        <div id="통진-total" style="font-size: 28px; font-weight: bold; color: #f39c12;">රු. 0</div>
-                        <div style="margin-top: 15px;">
-                            <div>දෙකට බෙදීම: <span id="통진-shared">රු. 0</span></div>
-                            <div>පෞද්ගලික: <span id="통진-personal">රු. 0</span></div>
-                        </div>
-                    </div>
-                    
-                    <div class="shop-summary-card 농협-summary" style="background: linear-gradient(145deg, #f4ecf7 0%, #e8daef 100%); padding: 25px; border-radius: 12px;">
-                        <h3 style="color: #8e44ad; margin-top: 0;">농협</h3>
-                        <div id="농협-total" style="font-size: 28px; font-weight: bold; color: #8e44ad;">රු. 0</div>
-                        <div style="margin-top: 15px;">
-                            <div>දෙකට බෙදීම: <span id="농협-shared">රු. 0</span></div>
-                            <div>පෞද්ගලික: <span id="농협-personal">රු. 0</span></div>
-                        </div>
+                    <div class="balance-detail">
+                        <span class="label">Personal Total:</span>
+                        <span class="value" id="sachin-personal-total">₩0</span>
                     </div>
                 </div>
                 
-                <div style="background: linear-gradient(145deg, #f2f4f4 0%, #e5e8e8 100%); padding: 25px; border-radius: 12px;">
-                    <h3 style="color: #7f8c8d; margin-top: 0;">වෙනත් වෙළඳසැල්</h3>
-                    <div id="Other-total" style="font-size: 28px; font-weight: bold; color: #7f8c8d;">රු. 0</div>
-                    <div style="margin-top: 15px;">
-                        <div>දෙකට බෙදීම: <span id="Other-shared">රු. 0</span></div>
-                        <div>පෞද්ගලික: <span id="Other-personal">රු. 0</span></div>
-                    </div>
+                <div class="payment-actions" id="sachin-payment-actions" style="display: none;">
+                    <button class="payment-btn" onclick="makeQuickPayment('Sachin', 'Jeewan')" id="sachin-payment-btn">
+                        💸 Pay Jeewan
+                    </button>
                 </div>
+            </div>
+        </section>
+
+        <!-- Status Banner -->
+        <div class="status-banner">
+            <div class="icon" id="status-icon">✅</div>
+            <div class="message" id="status-message">All Settled</div>
+            <div class="submessage" id="status-submessage">No outstanding debt</div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="label">Total Transactions</div>
+                <div class="value" id="stat-total">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Total Shared</div>
+                <div class="value" id="stat-shared">₩0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Total Personal</div>
+                <div class="value" id="stat-personal">₩0</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Total Payments</div>
+                <div class="value" id="stat-payments">₩0</div>
             </div>
         </div>
-        
-        <div class="tab-content" id="summary-tab">
-            <div class="section">
-                <h2>මාසික සාරාංශය</h2>
-                <div style="overflow-x: auto;">
-                    <table class="summary-table">
-                        <thead>
-                            <tr>
-                                <th>මාසය</th>
-                                <th>මුළු වියදම</th>
-                                <th>ගෘහ භාවිතය</th>
-                                <th>පෞද්ගලික</th>
-                                <th>සචින්ගේ කොටස</th>
-                                <th>ජීවන්ගේ කොටස</th>
-                                <th>සචින් ගෙවිය යුතු</th>
-                                <th>ජීවන් ගෙවිය යුතු</th>
-                            </tr>
-                        </thead>
-                        <tbody id="monthlySummaryTable">
-                            <!-- මාසික සාරාංශ මෙතැනට එකතු වේ -->
-                        </tbody>
-                    </table>
-                </div>
-                <div id="noSummary" style="text-align: center; padding: 30px; color: #7f8c8d;">
-                    තවම වියදම් සාරාංශ කිරීමට නැත.
-                </div>
-            </div>
-            
-            <div class="section">
-                <h2>සමස්ත සාරාංශය</h2>
-                <div class="summary-cards">
-                    <div class="summary-card">
-                        <div class="summary-title">සමස්ත මුළු වියදම</div>
-                        <div id="overallTotalExpense" class="summary-value total">රු. 0</div>
-                    </div>
-                    
-                    <div class="summary-card">
-                        <div class="summary-title">සමස්ත ගෘහ භාවිතය</div>
-                        <div id="overallSharedExpense" class="summary-value total">රු. 0</div>
-                    </div>
-                    
-                    <div class="summary-card">
-                        <div class="summary-title">සචින්ගේ සමස්ත කොටස</div>
-                        <div id="overallSachinShare" class="summary-value sachin-owes">රු. 0</div>
-                    </div>
-                    
-                    <div class="summary-card">
-                        <div class="summary-title">ජීවන්ගේ සමස්ත කොටස</div>
-                        <div id="overallJeevanShare" class="summary-value jeevan-owes">රු. 0</div>
-                    </div>
-                </div>
-                
-                <div id="overallSettlement" class="settlement-box" style="display: none;">
-                    <h4>සමස්ත ගෙවීම් සමථය</h4>
-                    <p id="overallSettlementText"></p>
-                    <button id="resetAllBtn" class="btn-danger" style="margin-top: 15px;">🗑️ සියලු දත්ත මකන්න</button>
-                </div>
-            </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <button class="quick-action-btn" onclick="scrollToForm()">
+                ➕ Add Transaction
+            </button>
+            <button class="quick-action-btn" onclick="exportToCSV()">
+                📥 Export CSV
+            </button>
+            <button class="quick-action-btn" onclick="clearAllData()">
+                🗑️ Clear All
+            </button>
+            <button class="quick-action-btn" onclick="loadSampleData()">
+                📊 Load Sample
+            </button>
         </div>
-        
-        <div class="tab-content" id="payment-tab">
-            <div class="section">
-                <h2>ගෙවීම් සටහන්</h2>
-                <p>මාසය අවසානයේ එක් අයෙකු අනෙකාට කොපමණ මුදලක් ගෙවිය යුතුද යන්න මෙහි දක්වා ඇත.</p>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 25px;">
-                    <div class="payment-card" style="background: linear-gradient(145deg, #fdebd0 0%, #fad7a0 100%); padding: 25px; border-radius: 12px; border-left: 5px solid #e67e22;">
-                        <h3 style="color: #e67e22; margin-top: 0;">සචින්ගේ ගෙවීම්</h3>
-                        <div id="sachinPayments">
-                            <!-- සචින්ගේ ගෙවීම් මෙතැනට එකතු වේ -->
-                        </div>
+
+        <!-- Form Section -->
+        <section class="form-section" id="form-section">
+            <h2>Add Transaction</h2>
+            <form id="expense-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="date">Date</label>
+                        <input type="text" id="date" class="date-picker" placeholder="Select date" required>
                     </div>
-                    
-                    <div class="payment-card" style="background: linear-gradient(145deg, #d6eaf8 0%, #aed6f1 100%); padding: 25px; border-radius: 12px; border-left: 5px solid #2980b9;">
-                        <h3 style="color: #2980b9; margin-top: 0;">ජීවන්ගේ ගෙවීම්</h3>
-                        <div id="jeevanPayments">
-                            <!-- ජීවන්ගේ ගෙවීම් මෙතැනට එකතු වේ -->
-                        </div>
+                    <div class="form-group">
+                        <label for="buyer">Buyer</label>
+                        <select id="buyer" required>
+                            <option value="">Select Buyer</option>
+                            <option value="Jeewan">Jeewan</option>
+                            <option value="Sachin">Sachin</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="shop">Shop</label>
+                        <select id="shop" required>
+                            <option value="">Select Shop</option>
+                            <option value="월드푸드">월드푸드</option>
+                            <option value="대농">대농</option>
+                            <option value="통진">통진</option>
+                            <option value="농협">농협</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="amount">Amount (₩)</label>
+                        <input type="number" id="amount" min="0" step="100" placeholder="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="type">Type</label>
+                        <select id="type" required>
+                            <option value="">Select Type</option>
+                            <option value="Shared">Shared</option>
+                            <option value="Personal">Personal</option>
+                            <option value="Payment">Payment</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <input type="text" id="description" placeholder="Optional notes">
                     </div>
                 </div>
-                
-                <div id="noPayments" style="text-align: center; padding: 30px; color: #7f8c8d;">
-                    තවම ගෙවීම් සටහන් නැත.
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">
+                        <span>Add Transaction</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                        Reset Form
+                    </button>
                 </div>
+            </form>
+        </section>
+
+        <!-- Transactions Section -->
+        <section class="transactions-section">
+            <div class="transactions-header">
+                <h2>Transaction History</h2>
+                <div class="filter-group">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="Shared">Shared</button>
+                    <button class="filter-btn" data-filter="Personal">Personal</button>
+                    <button class="filter-btn" data-filter="Payment">Payment</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="transaction-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Date</th>
+                            <th>Buyer</th>
+                            <th>Shop</th>
+                            <th>Amount</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>J.Balance</th>
+                            <th>S.Balance</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactions-tbody">
+                        <tr>
+                            <td colspan="10">
+                                <div class="empty-state">
+                                    <div class="icon">📭</div>
+                                    <h3>No Transactions Yet</h3>
+                                    <p>Add your first transaction to get started</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <div class="toast-content">
+            <div class="toast-icon">✓</div>
+            <div class="toast-message" id="toast-message"></div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal">
+            <h3 id="modal-title">Confirm Action</h3>
+            <p id="modal-message"></p>
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" id="modal-confirm">Confirm</button>
             </div>
         </div>
     </div>
 
-    <!-- ගෙවීම් ඇතුළත් කිරීමේ මොඩල් -->
-    <div id="paymentModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-        <div style="background: linear-gradient(145deg, #ffffff 0%, #f8faff 100%); border-radius: 15px; padding: 35px; max-width: 500px; width: 90%; box-shadow: 0 15px 35px rgba(0,0,0,0.2);">
-            <h2 style="margin-top: 0; color: #4a6fa5;">💰 ගෙවීමක් ඇතුළත් කරන්න</h2>
-            <p id="paymentModalText" style="margin-bottom: 25px;">මාසයේ ශේෂය ගෙවීමට</p>
-            
-            <div class="form-group">
-                <label>ගෙව්වේ කා විසින්ද?</label>
-                <select id="modalPaymentFrom" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0;">
-                    <option value="Sachin">සචින්</option>
-                    <option value="Jeevan">ජීවන්</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label>ගෙවූ මුදල</label>
-                <div class="currency-input">
-                    <input type="number" id="modalPaymentAmount" placeholder="මුදල් ප්‍රමාණය" min="0" style="width: 100%; padding: 12px; padding-left: 50px; border-radius: 8px; border: 1px solid #cbd5e0;">
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label>විස්තරය</label>
-                <input type="text" id="modalPaymentDescription" value="මාසයේ ශේෂය ගෙවීම" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0;">
-            </div>
-            
-            <div style="display: flex; gap: 15px; margin-top: 25px;">
-                <button id="savePaymentBtn" style="flex-grow: 1;">💾 ගෙවීම සුරකින්න</button>
-                <button id="cancelPaymentBtn" class="btn-danger">✖️ අවලංගු කරන්න</button>
-            </div>
-        </div>
-    </div>
-
+    <!-- Add Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-        // වියදම් ගබඩා කිරීමට අරාව
-        let expenses = [];
-        let payments = [];
-        
-        // වත්මන් දිනය සහ මාසය
-        const currentDate = new Date();
-        let currentMonth = currentDate.getMonth();
-        let currentYear = currentDate.getFullYear();
-        
-        // මාස නම්
-        const monthNames = [
-            "ජනවාරි", "පෙබරවාරි", "මාර්තු", "අප්‍රේල්", "මැයි", "ජූනි",
-            "ජූලි", "අගෝස්තු", "සැප්තැම්බර්", "ඔක්තෝබර්", "නොවැම්බර්", "දෙසැම්බර්"
-        ];
-        
-        // වෙළඳසැල් නම්
-        const shopNames = ["월드푸드", "대농", "통진", "농협", "Other"];
-        
-        // DOM අංග
-        const expenseDateInput = document.getElementById('expenseDate');
-        const paidBySelect = document.getElementById('paidBy');
-        const shopNameCustomInput = document.getElementById('shopNameCustom');
-        const expenseCategorySelect = document.getElementById('expenseCategory');
-        const expenseDescriptionInput = document.getElementById('expenseDescription');
-        const expenseAmountInput = document.getElementById('expenseAmount');
-        const forPersonSelect = document.getElementById('forPerson');
-        const addExpenseBtn = document.getElementById('addExpenseBtn');
-        const clearFormBtn = document.getElementById('clearFormBtn');
-        const addPaymentBtn = document.getElementById('addPaymentBtn');
-        const currentMonthDisplay = document.getElementById('currentMonthDisplay');
-        const prevMonthBtn = document.getElementById('prevMonthBtn');
-        const nextMonthBtn = document.getElementById('nextMonthBtn');
-        const todayMonthBtn = document.getElementById('todayMonthBtn');
-        const jumpToMonthSelect = document.getElementById('jumpToMonth');
-        
-        // වියදම් වගු
-        const detailedMonthExpenseTable = document.getElementById('detailedMonthExpenseTable');
-        const noCurrentMonthExpensesDetailed = document.getElementById('noCurrentMonthExpensesDetailed');
-        const allExpenseTable = document.getElementById('allExpenseTable');
-        const noAllExpenses = document.getElementById('noAllExpenses');
-        const monthlySummaryTable = document.getElementById('monthlySummaryTable');
-        const noSummary = document.getElementById('noSummary');
-        
-        // මාසික සාරාංශ මූලද්‍රව්‍ය
-        const monthTotalExpenseElement = document.getElementById('monthTotalExpense');
-        const monthSharedExpenseElement = document.getElementById('monthSharedExpense');
-        const monthSachinOwesElement = document.getElementById('monthSachinOwes');
-        const monthJeevanOwesElement = document.getElementById('monthJeevanOwes');
-        const monthSettlementText = document.getElementById('monthSettlementText');
-        const shopMonthlyTotals = document.getElementById('shopMonthlyTotals');
-        
-        // සමස්ත සාරාංශ මූලද්‍රව්‍ය
-        const overallTotalExpenseElement = document.getElementById('overallTotalExpense');
-        const overallSharedExpenseElement = document.getElementById('overallSharedExpense');
-        const overallSachinShareElement = document.getElementById('overallSachinShare');
-        const overallJeevanShareElement = document.getElementById('overallJeevanShare');
-        const overallSettlement = document.getElementById('overallSettlement');
-        const overallSettlementText = document.getElementById('overallSettlementText');
-        const resetAllBtn = document.getElementById('resetAllBtn');
-        
-        // ගෙවීම් ටැබ් මූලද්‍රව්‍ය
-        const sachinPaymentsDiv = document.getElementById('sachinPayments');
-        const jeevanPaymentsDiv = document.getElementById('jeevanPayments');
-        const noPaymentsDiv = document.getElementById('noPayments');
-        
-        // මොඩල් මූලද්‍රව්‍ය
-        const paymentModal = document.getElementById('paymentModal');
-        const paymentModalText = document.getElementById('paymentModalText');
-        const modalPaymentFrom = document.getElementById('modalPaymentFrom');
-        const modalPaymentAmount = document.getElementById('modalPaymentAmount');
-        const modalPaymentDescription = document.getElementById('modalPaymentDescription');
-        const savePaymentBtn = document.getElementById('savePaymentBtn');
-        const cancelPaymentBtn = document.getElementById('cancelPaymentBtn');
-        
-        // පෞද්ගලික ශේෂ
-        let sachinBalance = 0;
-        let jeevanBalance = 0;
-        let selectedShop = "월드푸드";
-        
-        // මූලික සැකසුම්
-        function initialize() {
-            // අද දිනය සකසන්න
-            const today = new Date();
-            const todayFormatted = today.toISOString().split('T')[0];
-            expenseDateInput.value = todayFormatted;
-            
-            // වත්මන් මාසය පෙන්වන්න
-            updateMonthDisplay();
-            
-            // මාස පැමිණෙන ලැයිස්ථව යාවත්කාලීන කරන්න
-            updateMonthDropdown();
-            
-            // වියදම් වර්ගය තේරීම
-            const expenseTypeBtns = document.querySelectorAll('.expense-type-btn');
-            expenseTypeBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    expenseTypeBtns.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    const type = this.getAttribute('data-type');
-                    if (type === 'personal') {
-                        forPersonSelect.disabled = false;
-                        forPersonSelect.value = 'Sachin';
-                    } else {
-                        forPersonSelect.disabled = true;
-                        forPersonSelect.value = 'both';
-                    }
-                });
-            });
-            
-            // වෙළඳසැල් තේරීම
-            const shopBtns = document.querySelectorAll('.shop-btn');
-            shopBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    shopBtns.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    selectedShop = this.getAttribute('data-shop');
-                    
-                    // වෙනත් වෙළඳසැල් නම් ආදානය පෙන්වන්න
-                    if (selectedShop === 'Other') {
-                        shopNameCustomInput.style.display = 'block';
-                    } else {
-                        shopNameCustomInput.style.display = 'none';
-                    }
-                });
-            });
-            
-            // ඉක්මන් එකතු කිරීමේ බොත්තම්
-            const quickAddBtns = document.querySelectorAll('.quick-add-btn');
-            quickAddBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const amount = this.getAttribute('data-amount');
-                    expenseAmountInput.value = amount;
-                });
-            });
-            
-            // උදාහරණ දත්ත එකතු කරන්න
-            loadExampleData();
-            
-            // ටැබ් වෙත සවි කරන්න
-            setupTabs();
-            
-            // මිතුරන් කාඩ්පත් ක්ලික් කිරීම
-            document.getElementById('sachinCard').addEventListener('click', function() {
-                document.querySelectorAll('.friend-card').forEach(card => card.classList.remove('active'));
-                this.classList.add('active');
-                paidBySelect.value = 'Sachin';
-            });
-            
-            document.getElementById('jeevanCard').addEventListener('click', function() {
-                document.querySelectorAll('.friend-card').forEach(card => card.classList.remove('active'));
-                this.classList.add('active');
-                paidBySelect.value = 'Jeevan';
-            });
-            
-            // ශේෂයන් යාවත්කාලීන කරන්න
-            updateBalances();
-        }
-        
-        // ටැබ් සකසන්න
-        function setupTabs() {
-            const tabs = document.querySelectorAll('.tab');
-            const tabContents = document.querySelectorAll('.tab-content');
-            
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const tabId = this.getAttribute('data-tab');
-                    
-                    // සක්‍රීය ටැබ් ඉවත් කරන්න
-                    tabs.forEach(t => t.classList.remove('active'));
-                    tabContents.forEach(c => c.classList.remove('active'));
-                    
-                    // නව ටැබ් සක්‍රීය කරන්න
-                    this.classList.add('active');
-                    document.getElementById(tabId + '-tab').classList.add('active');
-                    
-                    // ටැබ් අනුව දත්ත යාවත්කාලීන කරන්න
-                    if (tabId === 'current') {
-                        updateCurrentMonthExpensesDetailed();
-                    } else if (tabId === 'all') {
-                        updateAllExpenses();
-                    } else if (tabId === 'shops') {
-                        updateShopSummary();
-                    } else if (tabId === 'summary') {
-                        updateMonthlySummary();
-                        updateOverallSummary();
-                    } else if (tabId === 'payment') {
-                        updatePayments();
-                    }
-                });
-            });
-        }
-        
-        // මාස පැමිණෙන ලැයිස්ථව යාවත්කාලීන කරන්න
-        function updateMonthDropdown() {
-            // අවසන් 12 මාස එකතු කරන්න
-            jumpToMonthSelect.innerHTML = '<option value="">වෙනත් මාසයකට යන්න</option>';
-            
-            for (let i = 0; i < 12; i++) {
-                const monthOffset = 5 - i; // මීළඟ මාස 6ක් සහ පෙර මාස 6ක්
-                const date = new Date(currentYear, currentMonth + monthOffset, 1);
-                const month = date.getMonth();
-                const year = date.getFullYear();
-                const monthName = monthNames[month] + ' ' + year;
-                const value = year + '-' + (month + 1);
-                
-                const option = document.createElement('option');
-                option.value = value;
-                option.textContent = monthName;
-                
-                if (month === currentMonth && year === currentYear) {
-                    option.selected = true;
-                }
-                
-                jumpToMonthSelect.appendChild(option);
-            }
-            
-            jumpToMonthSelect.addEventListener('change', function() {
-                if (this.value) {
-                    const [year, month] = this.value.split('-').map(Number);
-                    currentYear = year;
-                    currentMonth = month - 1;
-                    updateMonthDisplay();
-                    updateMonthDropdown();
-                    updateCurrentMonthExpensesDetailed();
-                    updateMonthSummary();
-                    updateBalances();
-                    updateFriendCards();
-                    updateShopMonthlyTotals();
+        // Data Management
+        let transactions = [];
+        let jeewanSharedBalance = 0;
+        let sachinSharedBalance = 0;
+        let jeewanPersonalTotal = 0;
+        let sachinPersonalTotal = 0;
+        let currentFilter = 'all';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFromLocalStorage();
+            initializeDatePicker();
+            setupFilterButtons();
+            updateUI();
+        });
+
+        // Initialize date picker
+        function initializeDatePicker() {
+            flatpickr(".date-picker", {
+                dateFormat: "Y-m-d",
+                defaultDate: new Date(),
+                maxDate: new Date(),
+                theme: "dark",
+                onChange: function(selectedDates, dateStr, instance) {
+                    // Format date properly
+                    document.getElementById('date').value = dateStr;
                 }
             });
-        }
-        
-        // මාස දර්ශනය යාවත්කාලීන කරන්න
-        function updateMonthDisplay() {
-            currentMonthDisplay.textContent = monthNames[currentMonth] + ' ' + currentYear;
-        }
-        
-        // වියදම් වර්ගය ලබාගන්න
-        function getExpenseType() {
-            const activeBtn = document.querySelector('.expense-type-btn.active');
-            return activeBtn ? activeBtn.getAttribute('data-type') : 'shared';
-        }
-        
-        // වෙළඳසැල් නම ලබාගන්න
-        function getShopName() {
-            if (selectedShop === 'Other') {
-                return shopNameCustomInput.value.trim() || 'වෙනත් වෙළඳසැල';
-            }
-            return selectedShop;
-        }
-        
-        // වියදමක් එකතු කරන ක්‍රියාවලිය
-        function addExpense() {
-            const date = expenseDateInput.value;
-            const paidBy = paidBySelect.value;
-            const shopName = getShopName();
-            const category = expenseCategorySelect.value;
-            const description = expenseDescriptionInput.value.trim();
-            const amount = parseFloat(expenseAmountInput.value);
-            const expenseType = getExpenseType();
-            const forPerson = forPersonSelect.value;
             
-            // වලංගු බව පරීක්ෂා කරන්න
-            if (!date) {
-                alert('කරුණාකර දිනය ඇතුළත් කරන්න');
+            // Set today's date
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+        }
+
+        // Form submission
+        document.getElementById('expense-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const date = document.getElementById('date').value;
+            const buyer = document.getElementById('buyer').value;
+            const shop = document.getElementById('shop').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const type = document.getElementById('type').value;
+            const description = document.getElementById('description').value;
+
+            if (!date || !buyer || !shop || !amount || !type) {
+                showToast('Please fill in all required fields', 'error');
                 return;
             }
+
+            addTransaction(date, buyer, shop, amount, type, description);
             
-            if (!shopName) {
-                alert('කරුණාකර වෙළඳසැල් නම ඇතුළත් කරන්න');
-                return;
+            // Reset form
+            document.getElementById('amount').value = '';
+            document.getElementById('description').value = '';
+            
+            showToast('Transaction added successfully!', 'success');
+        });
+
+        function addTransaction(date, buyer, shop, amount, type, description) {
+            // Calculate balance changes
+            if (type === 'Shared') {
+                const splitAmount = amount / 2;
+                if (buyer === 'Jeewan') {
+                    jeewanSharedBalance += splitAmount;
+                    sachinSharedBalance -= splitAmount;
+                } else {
+                    sachinSharedBalance += splitAmount;
+                    jeewanSharedBalance -= splitAmount;
+                }
+            } else if (type === 'Personal') {
+                if (buyer === 'Jeewan') {
+                    jeewanPersonalTotal += amount;
+                } else {
+                    sachinPersonalTotal += amount;
+                }
+            } else if (type === 'Payment') {
+                if (buyer === 'Jeewan') {
+                    jeewanSharedBalance += amount;
+                    sachinSharedBalance -= amount;
+                } else {
+                    sachinSharedBalance += amount;
+                    jeewanSharedBalance -= amount;
+                }
             }
-            
-            if (!description) {
-                alert('කරුණාකර භාණ්ඩ විස්තරය ඇතුළත් කරන්න');
-                return;
-            }
-            
-            if (isNaN(amount) || amount <= 0) {
-                alert('කරුණාකර වලංගු මුදලක් ඇතුළත් කරන්න');
-                return;
-            }
-            
-            // නව වියදම් අයිතමය
-            const expense = {
-                id: Date.now() + Math.random(),
-                date: date,
-                month: currentMonth,
-                year: currentYear,
-                paidBy: paidBy,
-                shopName: shopName,
-                category: category,
-                description: description,
-                amount: amount,
-                type: expenseType,
-                forPerson: expenseType === 'personal' ? forPerson : 'both'
+
+            const transaction = {
+                id: transactions.length + 1,
+                date,
+                buyer,
+                shop: type === 'Payment' ? 'Settlement' : shop,
+                amount,
+                type,
+                description,
+                jeewanSharedBalance: Math.round(jeewanSharedBalance),
+                sachinSharedBalance: Math.round(sachinSharedBalance),
+                timestamp: new Date().getTime()
             };
-            
-            // අරාවට එකතු කරන්න
-            expenses.push(expense);
-            
-            // ආදානයන් හිස් කරන්න
-            clearForm();
-            
-            // දත්ත යාවත්කාලීන කරන්න
-            updateCurrentMonthExpensesDetailed();
-            updateMonthSummary();
-            updateBalances();
-            updateFriendCards();
-            updateShopMonthlyTotals();
-            
-            // සාරාංශ ටැබයේ නම්, එය යාවත්කාලීන කරන්න
-            if (document.querySelector('.tab[data-tab="summary"]').classList.contains('active')) {
-                updateMonthlySummary();
-                updateOverallSummary();
-            }
-            
-            // වෙළඳසැල් ටැබයේ නම්, එය යාවත්කාලීන කරන්න
-            if (document.querySelector('.tab[data-tab="shops"]').classList.contains('active')) {
-                updateShopSummary();
-            }
+
+            transactions.push(transaction);
+            saveToLocalStorage();
+            updateUI();
         }
-        
-        // ආකෘතිය හිස් කරන්න
-        function clearForm() {
-            expenseDateInput.value = new Date().toISOString().split('T')[0];
-            expenseDescriptionInput.value = '';
-            expenseAmountInput.value = '';
-            
-            // වියදම් වර්ගය ගෘහ භාවිතයට යළි සකසන්න
-            document.querySelectorAll('.expense-type-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector('.expense-type-btn[data-type="shared"]').classList.add('active');
-            forPersonSelect.disabled = true;
-            forPersonSelect.value = 'both';
-            
-            // වෙළඳසැල් තේරීම 월드푸d ට යළි සකසන්න
-            document.querySelectorAll('.shop-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector('.shop-btn[data-shop="월드푸드"]').classList.add('active');
-            selectedShop = "월드푸드";
-            shopNameCustomInput.style.display = 'none';
-            shopNameCustomInput.value = '';
-        }
-        
-        // වර්තමාන මාසයේ වියදම් යාවත්කාලීන කරන්න (විස්තරාත්මක)
-        function updateCurrentMonthExpensesDetailed() {
-            const monthExpenses = expenses.filter(exp => 
-                exp.month === currentMonth && 
-                exp.year === currentYear
+
+        function deleteTransaction(id) {
+            showModal(
+                'Delete Transaction',
+                'Are you sure you want to delete this transaction? This will recalculate all balances.',
+                () => {
+                    transactions = transactions.filter(t => t.id !== id);
+                    recalculateBalances();
+                    saveToLocalStorage();
+                    updateUI();
+                    showToast('Transaction deleted', 'success');
+                }
             );
-            
-            if (monthExpenses.length === 0) {
-                detailedMonthExpenseTable.innerHTML = '';
-                noCurrentMonthExpensesDetailed.style.display = 'block';
-                return;
-            }
-            
-            noCurrentMonthExpensesDetailed.style.display = 'none';
-            
-            // දිනය අනුව අවරෝහණව සකස් කරන්න
-            const sortedExpenses = [...monthExpenses].sort((a, b) => new Date(b.date) - new Date(a.date));
-            
-            // වියදම් ලැයිස්තුව ජනනය කරන්න
-            let html = '';
-            
-            sortedExpenses.forEach(expense => {
-                // දිනය සකස් කරන්න
-                const dateObj = new Date(expense.date);
-                const formattedDate = dateObj.toLocaleDateString('si-LK');
-                
-                // වර්ගයට අනුව ටැග්
-                const typeTag = expense.type === 'shared' ? 
-                    '<span class="expense-type-tag shared">දෙකට බෙදේ</span>' : 
-                    '<span class="expense-type-tag personal">පෞද්ගලික</span>';
-                
-                // ගෙව්වේ කා විසින්ද
-                const paidByTag = expense.paidBy === 'Sachin' ? 
-                    '<span class="person-tag sachin-tag">සචින්</span>' : 
-                    '<span class="person-tag jeevan-tag">ජීවන්</span>';
-                
-                // කා සඳහාද
-                let forPersonText = 'දෙදෙනාම (50/50)';
-                if (expense.forPerson === 'Sachin') forPersonText = 'සචින් පමණක්';
-                if (expense.forPerson === 'Jeevan') forPersonText = 'ජීවන් පමණක්';
-                
-                // වෙළඳසැල් ටැග්
-                const shopClass = expense.shopName === '월드푸드' ? '월드푸드-tag' : 
-                                 expense.shopName === '대농' ? '대농-tag' :
-                                 expense.shopName === '통진' ? '통진-tag' :
-                                 expense.shopName === '농협' ? '농협-tag' : 'Other-tag';
-                
-                const shopTag = `<span class="shop-tag ${shopClass}">${expense.shopName}</span>`;
-                
-                html += `
-                    <tr>
-                        <td>${formattedDate}</td>
-                        <td>${shopTag}</td>
-                        <td>${expense.description}</td>
-                        <td>රු. ${expense.amount.toLocaleString('si-LK', {minimumFractionDigits: 2})}</td>
-                        <td>${paidByTag}</td>
-                        <td>${typeTag}</td>
-                        <td>${forPersonText}</td>
-                        <td>
-                            <button class="edit-btn" onclick="editExpense(${expense.id})">සංස්කරණය</button>
-                            <button class="delete-btn" onclick="deleteExpense(${expense.id})">ඉවත් කරන්න</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            detailedMonthExpenseTable.innerHTML = html;
         }
-        
-        // සියලු වියදම් යාවත්කාලීන කරන්න
-        function updateAllExpenses() {
-            if (expenses.length === 0) {
-                allExpenseTable.innerHTML = '';
-                noAllExpenses.style.display = 'block';
-                return;
-            }
-            
-            noAllExpenses.style.display = 'none';
-            
-            // මාසය සහ දිනය අනුව අවරෝහණව සකස් කරන්න
-            const sortedExpenses = [...expenses].sort((a, b) => {
-                if (a.year !== b.year) return b.year - a.year;
-                if (a.month !== b.month) return b.month - a.month;
-                return new Date(b.date) - new Date(a.date);
-            });
-            
-            // වියදම් ලැයිස්තුව ජනනය කරන්න
-            let html = '';
-            
-            sortedExpenses.forEach(expense => {
-                // දිනය සකස් කරන්න
-                const dateObj = new Date(expense.date);
-                const formattedDate = dateObj.toLocaleDateString('si-LK');
-                
-                // වර්ගයට අනුව ටැග්
-                const typeTag = expense.type === 'shared' ? 
-                    '<span class="expense-type-tag shared">දෙකට බෙදේ</span>' : 
-                    '<span class="expense-type-tag personal">පෞද්ගලික</span>';
-                
-                // ගෙව්වේ කා විසින්ද
-                const paidByTag = expense.paidBy === 'Sachin' ? 
-                    '<span class="person-tag sachin-tag">සචින්</span>' : 
-                    '<span class="person-tag jeevan-tag">ජීවන්</span>';
-                
-                // කා සඳහාද
-                let forPersonText = 'දෙදෙනාම (50/50)';
-                if (expense.forPerson === 'Sachin') forPersonText = 'සචින් පමණක්';
-                if (expense.forPerson === 'Jeevan') forPersonText = 'ජීවන් පමණක්';
-                
-                // වෙළඳසැල් ටැග්
-                const shopClass = expense.shopName === '월드푸드' ? '월드푸드-tag' : 
-                                 expense.shopName === '대농' ? '대농-tag' :
-                                 expense.shopName === '통진' ? '통진-tag' :
-                                 expense.shopName === '농협' ? '농협-tag' : 'Other-tag';
-                
-                const shopTag = `<span class="shop-tag ${shopClass}">${expense.shopName}</span>`;
-                
-                html += `
-                    <tr>
-                        <td>${monthNames[expense.month]} ${expense.year}</td>
-                        <td>${formattedDate}</td>
-                        <td>${shopTag}</td>
-                        <td>${expense.description}</td>
-                        <td>රු. ${expense.amount.toLocaleString('si-LK', {minimumFractionDigits: 2})}</td>
-                        <td>${paidByTag}</td>
-                        <td>${typeTag}</td>
-                        <td>${forPersonText}</td>
-                        <td>
-                            <button class="edit-btn" onclick="editExpense(${expense.id})">සංස්කරණය</button>
-                            <button class="delete-btn" onclick="deleteExpense(${expense.id})">ඉවත් කරන්න</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            allExpenseTable.innerHTML = html;
-        }
-        
-        // මාසයේ සාරාංශය යාවත්කාලීන කරන්න
-        function updateMonthSummary() {
-            const monthExpenses = expenses.filter(exp => 
-                exp.month === currentMonth && 
-                exp.year === currentYear
-            );
-            
-            let monthTotal = 0;
-            let monthSharedTotal = 0;
-            let monthPersonalSachin = 0;
-            let monthPersonalJeevan = 0;
-            let sachinPaid = 0;
-            let jeevanPaid = 0;
-            let sachinShare = 0;
-            let jeevanShare = 0;
-            
-            monthExpenses.forEach(expense => {
-                monthTotal += expense.amount;
-                
-                // කා විසින් ගෙව්වාද යන්න ගණන් කරන්න
-                if (expense.paidBy === 'Sachin') {
-                    sachinPaid += expense.amount;
-                } else {
-                    jeevanPaid += expense.amount;
-                }
-                
-                // වියදම් වර්ගය අනුව ගණනය කරන්න
-                if (expense.type === 'shared') {
-                    // දෙකට බෙදේ (50/50)
-                    monthSharedTotal += expense.amount;
-                    const halfAmount = expense.amount / 2;
-                    sachinShare += halfAmount;
-                    jeevanShare += halfAmount;
-                } else {
-                    // පෞද්ගලික
-                    if (expense.forPerson === 'Sachin') {
-                        monthPersonalSachin += expense.amount;
-                        sachinShare += expense.amount;
-                    } else if (expense.forPerson === 'Jeevan') {
-                        monthPersonalJeevan += expense.amount;
-                        jeevanShare += expense.amount;
-                    }
-                }
-            });
-            
-            // ගණිතමය සාරාංශය ප්‍රදර්ශනය කරන්න
-            monthTotalExpenseElement.textContent = `රු. ${monthTotal.toLocaleString('si-LK', {minimumFractionDigits: 2})}`;
-            monthSharedExpenseElement.textContent = `රු. ${monthSharedTotal.toLocaleString('si-LK', {minimumFractionDigits: 2})}`;
-            
-            // තීරණය කරන්න කවුරුන්ට කීයක් ගෙවන්න ඕනද කියලා
-            const sachinOwes = sachinShare - sachinPaid;
-            const jeevanOwes = jeevanShare - jeevanPaid;
-            
-            // මුදල් ප්‍රදර්ශනය කරන්න
-            monthSachinOwesElement.textContent = `රු. ${Math.abs(sachinOwes).toLocaleString('si-LK', {minimumFractionDigits: 2})}`;
-            monthJeevanOwesElement.textContent = `රු. ${Math.abs(jeevanOwes).toLocaleString('si-LK', {minimumFractionDigits: 2})}`;
-            
-            // ගෙවීම් සමථය පෙන්වන්න
-            if (monthExpenses.length > 0) {
-                if (sachinOwes > 0) {
-                    monthSettlementText.textContent = `සචින් ජීවන්ට රුපියල් ${sachinOwes.toLocaleString('si-LK', {minimumFractionDigits: 2})} ගෙවන්න ඕන.`;
-                    monthSachinOwesElement.style.color = '#e74c3c'; // සචින් ගෙවන මුදල්
-                    monthJeevanOwesElement.style.color = '#27ae60'; // ජීවන්ට ලැබෙන මුදල්
-                } else if (sachinOwes < 0) {
-                    monthSettlementText.textContent = `ජීවන් සචින්ට රුපියල් ${Math.abs(sachinOwes).toLocaleString('si-LK', {minimumFractionDigits: 2})} ගෙවන්න ඕන.`;
-                    monthSachinOwesElement.style.color = '#27ae60'; // සචින්ට ලැබෙන මුදල්
-                    monthJeevanOwesElement.style.color = '#e74c3c'; // ජීවන් ගෙවන මුදල්
-                } else {
-                    monthSettlementText.textContent = 'මෙම මාසයේ සියලු වියදම් සමථ කර ඇත! කිසිවෙකුට තවත් මුදල් ගෙවන්න අවශ්‍ය නෑ.';
-                    monthSachinOwesElement.style.color = '#27ae60';
-                    monthJeevanOwesElement.style.color = '#27ae60';
-                }
-            } else {
-                monthSettlementText.textContent = 'මෙම මාසයට තවම වියදම් නැත.';
-                monthSachinOwesElement.style.color = '#2c3e50';
-                monthJeevanOwesElement.style.color = '#2c3e50';
-            }
-        }
-        
-        // වෙළඳසැල් අනුව මාසික වියදම් යාවත්කාලීන කරන්න
-        function updateShopMonthlyTotals() {
-            const monthExpenses = expenses.filter(exp => 
-                exp.month === currentMonth && 
-                exp.year === currentYear
-            );
-            
-            // වෙළඳසැල් අනුව වියදම් ගණනය කරන්න
-            const shopTotals = {};
-            shopNames.forEach(shop => {
-                shopTotals[shop] = {
-                    total: 0,
-                    shared: 0,
-                    personal: 0
-                };
-            });
-            
-            monthExpenses.forEach(expense => {
-                let shopKey = expense.shopName;
-                // වෙළඳසැල් නම් ලැයිස්තුවට නොමැති නම් "Other" ට එකතු කරන්න
-                if (!shopNames.includes(shopKey)) {
-                    shopKey = "Other";
-                }
-                
-                if (shopTotals[shopKey]) {
-                    shopTotals[shopKey].total += expense.amount;
-                    if (expense.type === 'shared') {
-                        shopTotals[shopKey].shared += expense.amount;
+
+        function recalculateBalances() {
+            // Reset all balances
+            jeewanSharedBalance = 0;
+            sachinSharedBalance = 0;
+            jeewanPersonalTotal = 0;
+            sachinPersonalTotal = 0;
+
+            // Recalculate from scratch
+            transactions.forEach((transaction, index) => {
+                if (transaction.type === 'Shared') {
+                    const splitAmount = transaction.amount / 2;
+                    if (transaction.buyer === 'Jeewan') {
+                        jeewanSharedBalance += splitAmount;
+                        sachinSharedBalance -= splitAmount;
                     } else {
-                        shopTotals[shopKey].personal += expense.amount;
+                        sachinSharedBalance += splitAmount;
+                        jeewanSharedBalance -= splitAmount;
+                    }
+                } else if (transaction.type === 'Personal') {
+                    if (transaction.buyer === 'Jeewan') {
+                        jeewanPersonalTotal += transaction.amount;
+                    } else {
+                        sachinPersonalTotal += transaction.amount;
+                    }
+                } else if (transaction.type === 'Payment') {
+                    if (transaction.buyer === 'Jeewan') {
+                        jeewanSharedBalance += transaction.amount;
+                        sachinSharedBalance -= transaction.amount;
+                    } else {
+                        sachinSharedBalance += transaction.amount;
+                        jeewanSharedBalance -= transaction.amount;
                     }
                 }
+
+                transaction.jeewanSharedBalance = Math.round(jeewanSharedBalance);
+                transaction.sachinSharedBalance = Math.round(sachinSharedBalance);
+                transaction.id = index + 1;
             });
+        }
+
+        function updateUI() {
+            updateBalanceCards();
+            updateStatusBanner();
+            updateTransactionTable();
+            updateStats();
+        }
+
+        function updateBalanceCards() {
+            // Jeewan's card
+            const jeewanAmountEl = document.getElementById('jeewan-amount');
+            const jeewanIndicatorEl = document.getElementById('jeewan-indicator');
+            const jeewanSharedBalanceEl = document.getElementById('jeewan-shared-balance');
+            const jeewanPersonalTotalEl = document.getElementById('jeewan-personal-total');
+            const jeewanPaymentActions = document.getElementById('jeewan-payment-actions');
+            const jeewanPaymentBtn = document.getElementById('jeewan-payment-btn');
+
+            // Sachin's card
+            const sachinAmountEl = document.getElementById('sachin-amount');
+            const sachinIndicatorEl = document.getElementById('sachin-indicator');
+            const sachinSharedBalanceEl = document.getElementById('sachin-shared-balance');
+            const sachinPersonalTotalEl = document.getElementById('sachin-personal-total');
+            const sachinPaymentActions = document.getElementById('sachin-payment-actions');
+            const sachinPaymentBtn = document.getElementById('sachin-payment-btn');
+
+            // Update Jeewan's details
+            jeewanSharedBalanceEl.textContent = `₩${Math.round(jeewanSharedBalance).toLocaleString()}`;
+            jeewanPersonalTotalEl.textContent = `₩${Math.round(jeewanPersonalTotal).toLocaleString()}`;
             
-            // HTML ජනනය කරන්න
-            let html = '';
-            shopNames.forEach(shop => {
-                const total = shopTotals[shop].total;
-                const shared = shopTotals[shop].shared;
-                const personal = shopTotals[shop].personal;
-                
-                if (total > 0) {
-                    html += `
-                        <div class="month-total-item">
-                            <div class="month-total-label">${shop}</div>
-                            <div class="month-total-value">රු. ${total.toLocaleString('si-LK', {minimumFractionDigits: 2})}</div>
-                            <div style="margin-top: 10px; font-size: 14px;">
-                                <div>දෙකට බෙදීම: රු. ${shared.toLocaleString('si-LK', {minimumFractionDigits: 2})}</div>
-                                <div>පෞද්ගලික: රු. ${personal.toLocaleString('si-LK', {minimumFractionDigits: 2})}</div>
+            if (jeewanSharedBalance > 0) {
+                jeewanAmountEl.textContent = `₩${Math.round(jeewanSharedBalance).toLocaleString()}`;
+                jeewanAmountEl.className = 'amount positive';
+                jeewanIndicatorEl.textContent = 'To Receive';
+                jeewanSharedBalanceEl.className = 'value positive';
+                jeewanPaymentActions.style.display = 'none';
+            } else if (jeewanSharedBalance < 0) {
+                jeewanAmountEl.textContent = `₩${Math.abs(Math.round(jeewanSharedBalance)).toLocaleString()}`;
+                jeewanAmountEl.className = 'amount negative';
+                jeewanIndicatorEl.textContent = 'To Pay';
+                jeewanSharedBalanceEl.className = 'value negative';
+                jeewanPaymentActions.style.display = 'block';
+                jeewanPaymentBtn.innerHTML = '💸 Pay Sachin';
+            } else {
+                jeewanAmountEl.textContent = '₩0';
+                jeewanAmountEl.className = 'amount neutral';
+                jeewanIndicatorEl.textContent = 'Balanced';
+                jeewanSharedBalanceEl.className = 'value';
+                jeewanPaymentActions.style.display = 'none';
+            }
+
+            // Update Sachin's details
+            sachinSharedBalanceEl.textContent = `₩${Math.round(sachinSharedBalance).toLocaleString()}`;
+            sachinPersonalTotalEl.textContent = `₩${Math.round(sachinPersonalTotal).toLocaleString()}`;
+            
+            if (sachinSharedBalance > 0) {
+                sachinAmountEl.textContent = `₩${Math.round(sachinSharedBalance).toLocaleString()}`;
+                sachinAmountEl.className = 'amount positive';
+                sachinIndicatorEl.textContent = 'To Receive';
+                sachinSharedBalanceEl.className = 'value positive';
+                sachinPaymentActions.style.display = 'none';
+            } else if (sachinSharedBalance < 0) {
+                sachinAmountEl.textContent = `₩${Math.abs(Math.round(sachinSharedBalance)).toLocaleString()}`;
+                sachinAmountEl.className = 'amount negative';
+                sachinIndicatorEl.textContent = 'To Pay';
+                sachinSharedBalanceEl.className = 'value negative';
+                sachinPaymentActions.style.display = 'block';
+                sachinPaymentBtn.innerHTML = '💸 Pay Jeewan';
+            } else {
+                sachinAmountEl.textContent = '₩0';
+                sachinAmountEl.className = 'amount neutral';
+                sachinIndicatorEl.textContent = 'Balanced';
+                sachinSharedBalanceEl.className = 'value';
+                sachinPaymentActions.style.display = 'none';
+            }
+        }
+
+        function updateStatusBanner() {
+            const iconEl = document.getElementById('status-icon');
+            const messageEl = document.getElementById('status-message');
+            const submessageEl = document.getElementById('status-submessage');
+
+            if (jeewanSharedBalance > 0) {
+                iconEl.textContent = '💰';
+                messageEl.textContent = `Sachin owes Jeewan ₩${Math.abs(Math.round(jeewanSharedBalance)).toLocaleString()}`;
+                submessageEl.textContent = 'Settlement pending';
+            } else if (jeewanSharedBalance < 0) {
+                iconEl.textContent = '💰';
+                messageEl.textContent = `Jeewan owes Sachin ₩${Math.abs(Math.round(jeewanSharedBalance)).toLocaleString()}`;
+                submessageEl.textContent = 'Settlement pending';
+            } else {
+                iconEl.textContent = '✅';
+                messageEl.textContent = 'All Settled';
+                submessageEl.textContent = 'No outstanding debt';
+            }
+        }
+
+        function updateTransactionTable() {
+            const tbody = document.getElementById('transactions-tbody');
+            
+            const filteredTransactions = currentFilter === 'all' 
+                ? transactions 
+                : transactions.filter(t => t.type === currentFilter);
+
+            if (filteredTransactions.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="10">
+                            <div class="empty-state">
+                                <div class="icon">📭</div>
+                                <h3>No Transactions Found</h3>
+                                <p>${currentFilter === 'all' ? 'Add your first transaction to get started' : `No ${currentFilter} transactions`}</p>
                             </div>
-                        </div>
-                    `;
-                }
-            });
-            
-            shopMonthlyTotals.innerHTML = html || '<div style="grid-column: 1 / -1; text-align: center; color: #7f8c8d;">මෙම මාසයට තවම වියදම් නැත.</div>';
-        }
-        
-        // වෙළඳසැල් සාරාංශය යාවත්කාලීන කරන්න
-        function updateShopSummary() {
-            // සියලු වෙළඳසැල් සඳහා සාරාංශ ගණනය කරන්න
-            shopNames.forEach(shop => {
-                const shopExpenses = expenses.filter(exp => 
-                    exp.shopName === shop || (shop === "Other" && !shopNames.includes(exp.shopName))
-                );
-                
-                let total = 0;
-                let shared = 0;
-                let personal = 0;
-                
-                shopExpenses.forEach(expense => {
-                    total += expense.amount;
-                    if (expense.type === 'shared') {
-                        shared += expense.amount;
-                    } else {
-                        personal += expense.amount;
-                    }
-                });
-                
-                // සාරාංශ මූලද්‍රව්‍ය යාවත්කාලීන කරන්න
-                document.getElementById(`${shop}-total`).textContent = `රු. ${total.toLocaleString('si-LK', {minimumFractionDigits: 2})}`;
-                document.getElementById(`${shop}-shared`).textContent = `රු. ${shared.toLocaleString('si-LK', {minimumFractionDigits: 2})}`;
-                document.getElementById(`${shop}-personal`).textContent = `රු. ${personal.toLocaleString('si-LK', {minimumFractionDigits: 2})}`;
-            });
-        }
-        
-        // මාසික සාරාංශ යාවත්කාලීන කරන්න
-        function updateMonthlySummary() {
-            // මාසය අනුව දත්ත කාණ්ඩගත කරන්න
-            const monthSummary = {};
-            
-            expenses.forEach(expense => {
-                const monthKey = `${expense.year}-${expense.month}`;
-                const monthName = `${monthNames[expense.month]} ${expense.year}`;
-                
-                if (!monthSummary[monthKey]) {
-                    monthSummary[monthKey] = {
-                        monthName: monthName,
-                        total: 0,
-                        shared: 0,
-                        personal: 0,
-                        sachinShare: 0,
-                        jeevanShare: 0,
-                        sachinPaid: 0,
-                        jeevanPaid: 0
-                    };
-                }
-                
-                const summary = monthSummary[monthKey];
-                summary.total += expense.amount;
-                
-                // කා විසින් ගෙව්වාද යන්න ගණන් කරන්න
-                if (expense.paidBy === 'Sachin') {
-                    summary.sachinPaid += expense.amount;
-                } else {
-                    summary.jeevanPaid += expense.amount;
-                }
-                
-                // වියදම් වර්ගය අනුව ගණනය කරන්න
-                if (expense.type === 'shared') {
-                    // දෙකට බෙදේ (50/50)
-                    summary.shared += expense.amount;
-                    const halfAmount = expense.amount / 2;
-                    summary.sachinShare += halfAmount;
-                    summary.jeevanShare += halfAmount;
-                } else {
-                    // පෞද්ගලික
-                    summary.personal += expense.amount;
-                    if (expense.forPerson === 'Sachin') {
-                        summary.sachinShare += expense.amount;
-                    } else if (expense.forPerson === 'Jeevan') {
-                        summary.jeevanShare += expense.amount;
-                    }
-                }
-            });
-            
-            if (Object.keys(monthSummary).length === 0) {
-                monthlySummaryTable.innerHTML = '';
-                noSummary.style.display = 'block';
-                return;
-            }
-            
-            noSummary.style.display = 'none';
-            
-            // වගු අංගය ජනනය කරන්න
-            let html = '';
-            
-            // මාස අනුව අවරෝහණව සකස් කරන්න
-            const sortedMonths = Object.keys(monthSummary).sort((a, b) => b.localeCompare(a));
-            
-            sortedMonths.forEach(monthKey => {
-                const summary = monthSummary[monthKey];
-                
-                // ගෙවිය යුතු මුදල් ගණනය කරන්න
-                const sachinOwes = summary.sachinShare - summary.sachinPaid;
-                const jeevanOwes = summary.jeevanShare - summary.jeevanPaid;
-                
-                html += `
-                    <tr>
-                        <td>${summary.monthName}</td>
-                        <td>රු. ${summary.total.toLocaleString('si-LK', {minimumFractionDigits: 2})}</td>
-                        <td>රු. ${summary.shared.toLocaleString('si-LK', {minimumFractionDigits: 2})}</td>
-                        <td>රු. ${summary.personal.toLocaleString('si-LK', {minimumFractionDigits: 2})}</td>
-                        <td>රු. ${summary.sachinShare.toLocaleString('si-LK', {minimumFractionDigits: 2})}</td>
-                        <td>රු. ${summary.jeevanShare.toLocaleString('si-LK', {minimumFractionDigits: 2})}</td>
-                        <td>රු. ${sachinOwes >= 0 ? sachinOwes.toLocaleString('si-LK', {minimumFractionDigits: 2}) : "0.00"}</td>
-                        <td>රු. ${jeevanOwes >= 0 ? jeevanOwes.toLocaleString('si-LK', {minimumFractionDigits: 2}) : "0.00"}</td>
+                        </td>
                     </tr>
                 `;
+                return;
+            }
+
+            tbody.innerHTML = filteredTransactions.reverse().map(t => `
+                <tr>
+                    <td>${t.id}</td>
+                    <td>${formatDate(t.date)}</td>
+                    <td>${t.buyer}</td>
+                    <td>${t.shop}</td>
+                    <td class="amount-cell">₩${t.amount.toLocaleString()}</td>
+                    <td><span class="type-badge type-${t.type.toLowerCase()}">${t.type}</span></td>
+                    <td>${t.description || '-'}</td>
+                    <td class="amount-cell ${getBalanceClass(t.jeewanSharedBalance)}">₩${t.jeewanSharedBalance.toLocaleString()}</td>
+                    <td class="amount-cell ${getBalanceClass(t.sachinSharedBalance)}">₩${t.sachinSharedBalance.toLocaleString()}</td>
+                    <td><button class="delete-btn" onclick="deleteTransaction(${t.id})" title="Delete">✕</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function updateStats() {
+            const totalTransactions = transactions.length;
+            const totalShared = transactions
+                .filter(t => t.type === 'Shared')
+                .reduce((sum, t) => sum + t.amount, 0);
+            const totalPersonal = transactions
+                .filter(t => t.type === 'Personal')
+                .reduce((sum, t) => sum + t.amount, 0);
+            const totalPayments = transactions
+                .filter(t => t.type === 'Payment')
+                .reduce((sum, t) => sum + t.amount, 0);
+
+            document.getElementById('stat-total').textContent = totalTransactions;
+            document.getElementById('stat-shared').textContent = `₩${totalShared.toLocaleString()}`;
+            document.getElementById('stat-personal').textContent = `₩${totalPersonal.toLocaleString()}`;
+            document.getElementById('stat-payments').textContent = `₩${totalPayments.toLocaleString()}`;
+        }
+
+        function getBalanceClass(balance) {
+            if (balance > 0) return 'balance-positive';
+            if (balance < 0) return 'balance-negative';
+            return 'balance-neutral';
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        // Filter functionality
+        function setupFilterButtons() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    filterButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.dataset.filter;
+                    updateTransactionTable();
+                });
             });
-            
-            monthlySummaryTable.innerHTML = html;
         }
-        
-        // සමස්ත සාරාංශය යාවත්කාලීන කරන්න
-        function updateOverallSummary() {
-            let overallTotal = 0;
-            let overallShared = 0;
-            let overallPersonal = 0;
-            let overallSachinShare = 0;
-            let overallJeevanShare = 0;
-            let overallSachinPaid = 0;
-            let overallJeevanPaid = 0;
+
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
             
-            expenses.forEach(expense => {
-                overallTotal += expense.amount;
-                
-                // කා විසින් ගෙව්වාද යන්න ගණන් කරන්න
-                if (expense.paidBy === 'Sachin') {
-                    overallSachinPaid += expense.amount;
-                } else {
-                    overallJeevanPaid += expense.amount;
-                }
-                
-                // වියදම් වර්ගය අනුව ගණනය කරන්න
-                if (expense.type === 'shared') {
-                    // දෙකට බෙදේ (50/50)
-                    overallShared += expense.amount;
-                    const halfAmount = expense.amount / 2;
-                    overallSachinShare += halfAmount;
-                    overallJeevanShare += halfAmount;
-                } else {
-                    // පෞද්ගලික
-                    overallPersonal += expense.amount;
-                    if (expense.forPerson === 'Sachin') {
-                        overallSachinShare += expense.amount;
-                    } else if (expense.forPerson === 'Jeevan') {
-                        overallJeevanShare += expense.amount;
-                    }
-                }
-            });
+            toast.className = `toast ${type}`;
+            toastMessage.textContent = message;
             
-            // සමස්ත සාරාංශය පෙන්වන්න
-            overallTotalExpenseElement.textContent = `රු. ${overallTotal.toLocaleString('si-LK', {minimumFractionDigits: 2})}`;
-            overallSharedExpenseElement.textContent = `රු. ${overallShared.toLocaleString('si-LK', {minimumFractionDigits: 2})}`;
-            overallSachinShareElement.textContent = `රු. ${overallSachinShare.toLocaleString('si-LK', {minimumFractionDigits: 2})}`;
-            overallJeevanShareElement.textContent = `රු. ${overallJeevanShare.toLocaleString('si-LK', {minimumFractionDigits: 2})}`;
+            setTimeout(() => toast.classList.add('show'), 100);
             
-            // සමස්ත ශේෂය
-            const sachinOwes = overallSachinShare - overallSachinPaid;
-            const jeevanOwes = overallJeevanShare - overallJeevanPaid;
-            
-            // ගෙවීම් සමථය පෙන්වන්න
-            if (expenses.length > 0) {
-                overallSettlement.style.display = 'block';
-                
-                if (sachinOwes > 0) {
-                    overallSettlementText.textContent = `සමස්තයක් ලෙස, සචින් ජීවන්ට රුපියල් ${sachinOwes.toLocaleString('si-LK', {minimumFractionDigits: 2})} ගෙවන්න ඕන.`;
-                } else if (sachinOwes < 0) {
-                    overallSettlementText.textContent = `සමස්තයක් ලෙස, ජීවන් සචින්ට රුපියල් ${Math.abs(sachinOwes).toLocaleString('si-LK', {minimumFractionDigits: 2})} ගෙවන්න ඕන.`;
-                } else {
-                    overallSettlementText.textContent = 'සියලු වියදම් සමථ කර ඇත! කිසිවෙකුට තවත් මුදල් ගෙවන්න අවශ්‍ය නෑ.';
-                }
-            } else {
-                overallSettlement.style.display = 'none';
-            }
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
         }
-        
-        // ශේෂයන් යාවත්කාලීන කරන්න
-        function updateBalances() {
-            // වත්මන් මාසයේ වියදම් ගණනය කරන්න
-            const monthExpenses = expenses.filter(exp => 
-                exp.month === currentMonth && 
-                exp.year === currentYear
-            );
+
+        // Modal
+        function showModal(title, message, onConfirm) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-message').textContent = message;
+            document.getElementById('modal-overlay').classList.add('show');
             
-            let sachinShare = 0;
-            let jeevanShare = 0;
-            let sachinPaid = 0;
-            let jeevanPaid = 0;
-            
-            monthExpenses.forEach(expense => {
-                // කා විසින් ගෙව්වාද යන්න ගණන් කරන්න
-                if (expense.paidBy === 'Sachin') {
-                    sachinPaid += expense.amount;
-                } else {
-                    jeevanPaid += expense.amount;
-                }
-                
-                // වියදම් වර්ගය අනුව ගණනය කරන්න
-                if (expense.type === 'shared') {
-                    // දෙකට බෙදේ (50/50)
-                    const halfAmount = expense.amount / 2;
-                    sachinShare += halfAmount;
-                    jeevanShare += halfAmount;
-                } else {
-                    // පෞද්ගලික
-                    if (expense.forPerson === 'Sachin') {
-                        sachinShare += expense.amount;
-                    } else if (expense.forPerson === 'Jeevan') {
-                        jeevanShare += expense.amount;
-                    }
-                }
-            });
-            
-            // ශේෂයන් ගණනය කරන්න
-            sachinBalance = sachinShare - sachinPaid;
-            jeevanBalance = jeevanShare - jeevanPaid;
-            
-            // පෙන්වන්න
-            document.getElementById('sachinBalance').textContent = 
-                sachinBalance >= 0 ? 
-                `ගෙවිය යුතු: රු. ${sachinBalance.toLocaleString('si-LK', {minimumFractionDigits: 2})}` :
-                `ලැබිය යුතු: රු. ${Math.abs(sachinBalance).toLocaleString('si-LK', {minimumFractionDigits: 2})}`;
-                
-            document.getElementById('jeevanBalance').textContent = 
-                jeevanBalance >= 0 ? 
-                `ගෙවිය යුතු: රු. ${jeevanBalance.toLocaleString('si-LK', {minimumFractionDigits: 2})}` :
-                `ලැබිය යුතු: රු. ${Math.abs(jeevanBalance).toLocaleString('si-LK', {minimumFractionDigits: 2})}`;
-        }
-        
-        // මිතුරන් කාඩ්පත් යාවත්කාලීන කරන්න
-        function updateFriendCards() {
-            // සචින් කාඩ්පත
-            const sachinCard = document.getElementById('sachinCard');
-            if (sachinBalance > 0) {
-                sachinCard.style.borderColor = '#e74c3c';
-                sachinCard.querySelector('.sachin-avatar').style.background = 'linear-gradient(145deg, #e74c3c 0%, #c0392b 100%)';
-            } else if (sachinBalance < 0) {
-                sachinCard.style.borderColor = '#27ae60';
-                sachinCard.querySelector('.sachin-avatar').style.background = 'linear-gradient(145deg, #27ae60 0%, #219653 100%)';
-            } else {
-                sachinCard.style.borderColor = '#4a6fa5';
-                sachinCard.querySelector('.sachin-avatar').style.background = 'linear-gradient(145deg, #e74c3c 0%, #c0392b 100%)';
-            }
-            
-            // ජීවන් කාඩ්පත
-            const jeevanCard = document.getElementById('jeevanCard');
-            if (jeevanBalance > 0) {
-                jeevanCard.style.borderColor = '#e74c3c';
-                jeevanCard.querySelector('.jeevan-avatar').style.background = 'linear-gradient(145deg, #e74c3c 0%, #c0392b 100%)';
-            } else if (jeevanBalance < 0) {
-                jeevanCard.style.borderColor = '#27ae60';
-                jeevanCard.querySelector('.jeevan-avatar').style.background = 'linear-gradient(145deg, #27ae60 0%, #219653 100%)';
-            } else {
-                jeevanCard.style.borderColor = '#4a6fa5';
-                jeevanCard.querySelector('.jeevan-avatar').style.background = 'linear-gradient(145deg, #3498db 0%, #2980b9 100%)';
-            }
-        }
-        
-        // වියදමක් සංස්කරණය කරන්න
-        function editExpense(id) {
-            const expense = expenses.find(exp => exp.id === id);
-            if (!expense) return;
-            
-            // වත්මන් මාසයට යන්න
-            currentMonth = expense.month;
-            currentYear = expense.year;
-            
-            updateMonthDisplay();
-            updateMonthDropdown();
-            
-            // ආකෘතිය පුරවන්න
-            expenseDateInput.value = expense.date;
-            paidBySelect.value = expense.paidBy;
-            expenseDescriptionInput.value = expense.description;
-            expenseAmountInput.value = expense.amount;
-            expenseCategorySelect.value = expense.category;
-            
-            // වෙළඳසැල් සකසන්න
-            let shopToSelect = expense.shopName;
-            if (!shopNames.includes(shopToSelect)) {
-                shopToSelect = "Other";
-                shopNameCustomInput.value = expense.shopName;
-                shopNameCustomInput.style.display = 'block';
-            } else {
-                shopNameCustomInput.style.display = 'none';
-            }
-            
-            document.querySelectorAll('.shop-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`.shop-btn[data-shop="${shopToSelect}"]`).classList.add('active');
-            selectedShop = shopToSelect;
-            
-            // වියදම් වර්ගය සකසන්න
-            document.querySelectorAll('.expense-type-btn').forEach(btn => btn.classList.remove('active'));
-            if (expense.type === 'shared') {
-                document.querySelector('.expense-type-btn[data-type="shared"]').classList.add('active');
-                forPersonSelect.disabled = true;
-                forPersonSelect.value = 'both';
-            } else {
-                document.querySelector('.expense-type-btn[data-type="personal"]').classList.add('active');
-                forPersonSelect.disabled = false;
-                forPersonSelect.value = expense.forPerson;
-            }
-            
-            // ගෙව්වේ කා විසින්ද අනුව මිතුරන් කාඩ්පත් සකසන්න
-            document.querySelectorAll('.friend-card').forEach(card => card.classList.remove('active'));
-            if (expense.paidBy === 'Sachin') {
-                document.getElementById('sachinCard').classList.add('active');
-            } else {
-                document.getElementById('jeevanCard').classList.add('active');
-            }
-            
-            // එකතු කිරීමේ බොත්තම සංස්කරණය කිරීමට වෙනස් කරන්න
-            addExpenseBtn.textContent = '🔄 යාවත්කාලීන කරන්න';
-            addExpenseBtn.onclick = function() {
-                updateExpense(id);
+            document.getElementById('modal-confirm').onclick = () => {
+                onConfirm();
+                closeModal();
             };
-            
-            // "එකතු කරන්න" ටැබයට යන්න
-            document.querySelector('.tab[data-tab="add"]').click();
         }
-        
-        // වියදමක් යාවත්කාලීන කරන්න
-        function updateExpense(id) {
-            const date = expenseDateInput.value;
-            const paidBy = paidBySelect.value;
-            const shopName = getShopName();
-            const category = expenseCategorySelect.value;
-            const description = expenseDescriptionInput.value.trim();
-            const amount = parseFloat(expenseAmountInput.value);
-            const expenseType = getExpenseType();
-            const forPerson = forPersonSelect.value;
-            
-            // වලංගු බව පරීක්ෂා කරන්න
-            if (!date) {
-                alert('කරුණාකර දිනය ඇතුළත් කරන්න');
-                return;
-            }
-            
-            if (!shopName) {
-                alert('කරුණාකර වෙළඳසැල් නම ඇතුළත් කරන්න');
-                return;
-            }
-            
-            if (!description) {
-                alert('කරුණාකර භාණ්ඩ විස්තරය ඇතුළත් කරන්න');
-                return;
-            }
-            
-            if (isNaN(amount) || amount <= 0) {
-                alert('කරුණාකර වලංගු මුදලක් ඇතුළත් කරන්න');
-                return;
-            }
-            
-            // වියදම සොයාගෙන යාවත්කාලීන කරන්න
-            const expenseIndex = expenses.findIndex(exp => exp.id === id);
-            if (expenseIndex !== -1) {
-                const dateObj = new Date(date);
-                
-                expenses[expenseIndex] = {
-                    id: id,
-                    date: date,
-                    month: dateObj.getMonth(),
-                    year: dateObj.getFullYear(),
-                    paidBy: paidBy,
-                    shopName: shopName,
-                    category: category,
-                    description: description,
-                    amount: amount,
-                    type: expenseType,
-                    forPerson: expenseType === 'personal' ? forPerson : 'both'
-                };
-                
-                // ආකෘතිය හිස් කරන්න
-                clearForm();
-                
-                // බොත්තම නැවත එකතු කිරීමට වෙනස් කරන්න
-                addExpenseBtn.textContent = '✅ වියදම් එකතු කරන්න';
-                addExpenseBtn.onclick = addExpense;
-                
-                // දත්ත යාවත්කාලීන කරන්න
-                updateCurrentMonthExpensesDetailed();
-                updateMonthSummary();
-                updateBalances();
-                updateFriendCards();
-                updateShopMonthlyTotals();
-                
-                // සාරාංශ ටැබයේ නම්, එය යාවත්කාලීන කරන්න
-                if (document.querySelector('.tab[data-tab="summary"]').classList.contains('active')) {
-                    updateMonthlySummary();
-                    updateOverallSummary();
-                }
-                
-                // වෙළඳසැල් ටැබයේ නම්, එය යාවත්කාලීන කරන්න
-                if (document.querySelector('.tab[data-tab="shops"]').classList.contains('active')) {
-                    updateShopSummary();
-                }
-            }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('show');
         }
-        
-        // වියදමක් මකාදැමීම
-        function deleteExpense(id) {
-            if (confirm('ඔබට මෙම වියදම ඉවත් කිරීමට අවශ්‍යද?')) {
-                expenses = expenses.filter(expense => expense.id !== id);
-                updateCurrentMonthExpensesDetailed();
-                updateMonthSummary();
-                updateBalances();
-                updateFriendCards();
-                updateShopMonthlyTotals();
+
+        // Utility functions
+        function scrollToForm() {
+            document.getElementById('form-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            document.getElementById('expense-form').reset();
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+        }
+
+        function makeQuickPayment(from, to) {
+            let owedAmount;
+            
+            if (from === 'Jeewan') {
+                owedAmount = Math.abs(jeewanSharedBalance);
+            } else {
+                owedAmount = Math.abs(sachinSharedBalance);
+            }
+            
+            if (owedAmount === 0) {
+                showToast('No debt to pay!', 'info');
+                return;
+            }
+            
+            // Create a custom prompt for the payment amount
+            const paymentAmount = prompt(`${from} is paying ${to}\n\nCurrent debt: ₩${owedAmount.toLocaleString()}\n\nEnter payment amount (or leave empty to pay full amount):`);
+            
+            if (paymentAmount === null) {
+                // User cancelled
+                return;
+            }
+            
+            let amount;
+            if (paymentAmount === '' || paymentAmount.trim() === '') {
+                // Pay full amount
+                amount = owedAmount;
+            } else {
+                amount = parseInt(paymentAmount.replace(/,/g, ''));
                 
-                // සාරාංශ ටැබයේ නම්, එය යාවත්කාලීන කරන්න
-                if (document.querySelector('.tab[data-tab="summary"]').classList.contains('active')) {
-                    updateMonthlySummary();
-                    updateOverallSummary();
+                if (isNaN(amount) || amount <= 0) {
+                    showToast('Invalid amount entered', 'error');
+                    return;
                 }
                 
-                // වෙළඳසැල් ටැබයේ නම්, එය යාවත්කාලීන කරන්න
-                if (document.querySelector('.tab[data-tab="shops"]').classList.contains('active')) {
-                    updateShopSummary();
+                if (amount > owedAmount) {
+                    showToast(`Payment amount cannot exceed debt of ₩${owedAmount.toLocaleString()}`, 'error');
+                    return;
                 }
             }
+            
+            // Add the payment as a transaction
+            const today = new Date().toISOString().split('T')[0];
+            addTransaction(today, from, 'Settlement', amount, 'Payment', `Quick payment from ${from} to ${to}`);
+            
+            showToast(`Payment of ₩${amount.toLocaleString()} recorded!`, 'success');
         }
-        
-        // ගෙවීම් ඇතුළත් කිරීමේ මොඩල් විවෘත කරන්න
-        function openPaymentModal() {
-            // වත්මන් ශේෂයන් ගණනය කරන්න
-            const monthExpenses = expenses.filter(exp => 
-                exp.month === currentMonth && 
-                exp.year === currentYear
+
+        function clearAllData() {
+            showModal(
+                'Clear All Data',
+                'Are you sure you want to delete all transactions? This action cannot be undone.',
+                () => {
+                    transactions = [];
+                    jeewanSharedBalance = 0;
+                    sachinSharedBalance = 0;
+                    jeewanPersonalTotal = 0;
+                    sachinPersonalTotal = 0;
+                    saveToLocalStorage();
+                    updateUI();
+                    showToast('All data cleared', 'success');
+                }
             );
-            
-            if (monthExpenses.length === 0) {
-                alert('මෙම මාසයට තවම වියදම් නැත.');
-                return;
-            }
-            
-            // ශේෂය ගණනය කරන්න
-            let sachinShare = 0;
-            let jeevanShare = 0;
-            let sachinPaid = 0;
-            let jeevanPaid = 0;
-            
-            monthExpenses.forEach(expense => {
-                // කා විසින් ගෙව්වාද යන්න ගණන් කරන්න
-                if (expense.paidBy === 'Sachin') {
-                    sachinPaid += expense.amount;
-                } else {
-                    jeevanPaid += expense.amount;
-                }
-                
-                // වියදම් වර්ගය අනුව ගණනය කරන්න
-                if (expense.type === 'shared') {
-                    // දෙකට බෙදේ (50/50)
-                    const halfAmount = expense.amount / 2;
-                    sachinShare += halfAmount;
-                    jeevanShare += halfAmount;
-                } else {
-                    // පෞද්ගලික
-                    if (expense.forPerson === 'Sachin') {
-                        sachinShare += expense.amount;
-                    } else if (expense.forPerson === 'Jeevan') {
-                        jeevanShare += expense.amount;
-                    }
-                }
-            });
-            
-            const sachinOwes = sachinShare - sachinPaid;
-            const jeevanOwes = jeevanShare - jeevanPaid;
-            
-            // මොඩල් සකසන්න
-            if (sachinOwes > 0) {
-                // සචින් ජීවන්ට ගෙවිය යුතුයි
-                paymentModalText.textContent = `සචින් ජීවන්ට රුපියල් ${sachinOwes.toLocaleString('si-LK', {minimumFractionDigits: 2})} ගෙවන්න ඕන.`;
-                modalPaymentFrom.value = 'Sachin';
-                modalPaymentAmount.value = sachinOwes;
-            } else if (sachinOwes < 0) {
-                // ජීවන් සචින්ට ගෙවිය යුතුයි
-                paymentModalText.textContent = `ජීවන් සචින්ට රුපියල් ${Math.abs(sachinOwes).toLocaleString('si-LK', {minimumFractionDigits: 2})} ගෙවන්න ඕන.`;
-                modalPaymentFrom.value = 'Jeevan';
-                modalPaymentAmount.value = Math.abs(sachinOwes);
-            } else {
-                // ශේෂය නැත
-                paymentModalText.textContent = 'මෙම මාසයේ ශේෂයක් නැත.';
-                modalPaymentAmount.value = '';
-            }
-            
-            modalPaymentDescription.value = `${monthNames[currentMonth]} ${currentYear} මාසයේ ශේෂය ගෙවීම`;
-            
-            // මොඩල් පෙන්වන්න
-            paymentModal.style.display = 'flex';
         }
-        
-        // ගෙවීමක් සුරකින්න
-        function savePayment() {
-            const from = modalPaymentFrom.value;
-            const amount = parseFloat(modalPaymentAmount.value);
-            const description = modalPaymentDescription.value.trim();
-            
-            if (isNaN(amount) || amount <= 0) {
-                alert('කරුණාකර වලංගු මුදලක් ඇතුළත් කරන්න');
+
+        function loadSampleData() {
+            showModal(
+                'Load Sample Data',
+                'This will add sample transactions. Your existing data will be kept.',
+                () => {
+                    addTransaction('2026-02-01', 'Jeewan', '월드푸드', 20000, 'Shared', 'Rice and vegetables');
+                    addTransaction('2026-02-03', 'Sachin', '대농', 15000, 'Shared', 'Fruits and snacks');
+                    addTransaction('2026-02-04', 'Jeewan', '통진', 8000, 'Personal', 'Personal lunch');
+                    addTransaction('2026-02-05', 'Sachin', '농협', 12000, 'Shared', 'Eggs and milk');
+                    addTransaction('2026-02-10', 'Jeewan', 'Settlement', 3500, 'Payment', 'Salary settlement');
+                    addTransaction('2026-02-12', 'Sachin', 'Other', 25000, 'Shared', 'Weekly groceries');
+                    addTransaction('2026-02-15', 'Sachin', '월드푸드', 5000, 'Personal', 'Snacks');
+                    showToast('Sample data loaded successfully!', 'success');
+                }
+            );
+        }
+
+        function exportToCSV() {
+            if (transactions.length === 0) {
+                showToast('No transactions to export!', 'error');
                 return;
             }
+
+            let csv = 'ID,Date,Buyer,Shop,Amount,Type,Description,Jeewan_Shared_Balance,Sachin_Shared_Balance\n';
             
-            if (!description) {
-                alert('කරුණාකර විස්තරය ඇතුළත් කරන්න');
-                return;
-            }
+            transactions.forEach(t => {
+                csv += `${t.id},${t.date},${t.buyer},${t.shop},${t.amount},${t.type},"${t.description}",${t.jeewanSharedBalance},${t.sachinSharedBalance}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
             
-            // කාටද යන්න තීරණය කරන්න
-            const to = from === 'Sachin' ? 'Jeevan' : 'Sachin';
+            link.setAttribute('href', url);
+            link.setAttribute('download', `splitsync_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
             
-            // නව ගෙවීම් අයිතමය
-            const payment = {
-                id: Date.now() + Math.random(),
-                date: new Date().toISOString().split('T')[0],
-                from: from,
-                to: to,
-                amount: amount,
-                description: description,
-                month: currentMonth,
-                year: currentYear
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast('CSV exported successfully!', 'success');
+        }
+
+        // Local Storage
+        function saveToLocalStorage() {
+            const data = {
+                transactions,
+                jeewanSharedBalance,
+                sachinSharedBalance,
+                jeewanPersonalTotal,
+                sachinPersonalTotal
             };
-            
-            // ගෙවීම් අරාවට එකතු කරන්න
-            payments.push(payment);
-            
-            // මොඩල් වසන්න
-            paymentModal.style.display = 'none';
-            
-            // මාසයේ වියදම් යාවත්කාලීන කරන්න
-            updateMonthSummary();
-            updateBalances();
-            updateFriendCards();
-            
-            // ගෙවීම් සටහන් යාවත්කාලීන කරන්න
-            updatePayments();
-            
-            // පණිවිඩය පෙන්වන්න
-            alert(`ගෙවීම සාර්ථකව ඇතුළත් කරන ලදී: ${from} විසින් ${to} ට රුපියල් ${amount.toLocaleString('si-LK', {minimumFractionDigits: 2})}`);
+            localStorage.setItem('splitsync_data', JSON.stringify(data));
         }
-        
-        // ගෙවීම් සටහන් යාවත්කාලීන කරන්න
-        function updatePayments() {
-            if (payments.length === 0) {
-                sachinPaymentsDiv.innerHTML = '';
-                jeevanPaymentsDiv.innerHTML = '';
-                noPaymentsDiv.style.display = 'block';
-                return;
-            }
-            
-            noPaymentsDiv.style.display = 'none';
-            
-            // සචින්ගේ ගෙවීම්
-            const sachinPaymentsList = payments.filter(p => p.from === 'Sachin');
-            let sachinHtml = '';
-            if (sachinPaymentsList.length === 0) {
-                sachinHtml = '<p style="text-align: center; color: #7f8c8d;">තවම ගෙවීම් නැත</p>';
-            } else {
-                sachinPaymentsList.forEach(payment => {
-                    const dateObj = new Date(payment.date);
-                    const formattedDate = dateObj.toLocaleDateString('si-LK');
-                    sachinHtml += `
-                        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                            <div style="font-weight: bold; color: #2c3e50;">${payment.description}</div>
-                            <div style="margin-top: 8px; font-size: 14px;">${formattedDate} - රු. ${payment.amount.toLocaleString('si-LK', {minimumFractionDigits: 2})}</div>
-                            <div style="margin-top: 5px; font-size: 12px; color: #7f8c8d;">${payment.to} ට ගෙවන ලදී</div>
-                        </div>
-                    `;
-                });
-            }
-            sachinPaymentsDiv.innerHTML = sachinHtml;
-            
-            // ජීවන්ගේ ගෙවීම්
-            const jeevanPaymentsList = payments.filter(p => p.from === 'Jeevan');
-            let jeevanHtml = '';
-            if (jeevanPaymentsList.length === 0) {
-                jeevanHtml = '<p style="text-align: center; color: #7f8c8d;">තවම ගෙවීම් නැත</p>';
-            } else {
-                jeevanPaymentsList.forEach(payment => {
-                    const dateObj = new Date(payment.date);
-                    const formattedDate = dateObj.toLocaleDateString('si-LK');
-                    jeevanHtml += `
-                        <div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                            <div style="font-weight: bold; color: #2c3e50;">${payment.description}</div>
-                            <div style="margin-top: 8px; font-size: 14px;">${formattedDate} - රු. ${payment.amount.toLocaleString('si-LK', {minimumFractionDigits: 2})}</div>
-                            <div style="margin-top: 5px; font-size: 12px; color: #7f8c8d;">${payment.to} ට ගෙවන ලදී</div>
-                        </div>
-                    `;
-                });
-            }
-            jeevanPaymentsDiv.innerHTML = jeevanHtml;
-        }
-        
-        // මාසයන් සමඟ සංචලනය කරන්න
-        function prevMonth() {
-            currentMonth--;
-            if (currentMonth < 0) {
-                currentMonth = 11;
-                currentYear--;
-            }
-            updateMonthDisplay();
-            updateMonthDropdown();
-            updateCurrentMonthExpensesDetailed();
-            updateMonthSummary();
-            updateBalances();
-            updateFriendCards();
-            updateShopMonthlyTotals();
-        }
-        
-        function nextMonth() {
-            currentMonth++;
-            if (currentMonth > 11) {
-                currentMonth = 0;
-                currentYear++;
-            }
-            updateMonthDisplay();
-            updateMonthDropdown();
-            updateCurrentMonthExpensesDetailed();
-            updateMonthSummary();
-            updateBalances();
-            updateFriendCards();
-            updateShopMonthlyTotals();
-        }
-        
-        function goToTodayMonth() {
-            const today = new Date();
-            currentMonth = today.getMonth();
-            currentYear = today.getFullYear();
-            
-            updateMonthDisplay();
-            updateMonthDropdown();
-            updateCurrentMonthExpensesDetailed();
-            updateMonthSummary();
-            updateBalances();
-            updateFriendCards();
-            updateShopMonthlyTotals();
-        }
-        
-        // උදාහරණ දත්ත එකතු කරන්න
-        function loadExampleData() {
-            // උදාහරණ වියදම්
-            const exampleExpenses = [
-                {
-                    date: new Date().toISOString().split('T')[0],
-                    paidBy: 'Sachin',
-                    shopName: '월드푸드',
-                    category: 'groceries',
-                    description: 'කිරි 2, බත් 5kg, තෙල් 1L, සීනි 1kg',
-                    amount: 2000,
-                    type: 'shared',
-                    forPerson: 'both'
-                },
-                {
-                    date: new Date().toISOString().split('T')[0],
-                    paidBy: 'Jeevan',
-                    shopName: '대농',
-                    category: 'meat',
-                    description: 'කුකුල් මස් 1kg, මාළු 500g',
-                    amount: 1500,
-                    type: 'shared',
-                    forPerson: 'both'
-                },
-                {
-                    date: new Date().toISOString().split('T')[0],
-                    paidBy: 'Sachin',
-                    shopName: '통진',
-                    category: 'cleaning',
-                    description: 'සබන්, පිරිසිදු කිරීමේ පවුඩර්',
-                    amount: 800,
-                    type: 'shared',
-                    forPerson: 'both'
-                },
-                {
-                    date: new Date().toISOString().split('T')[0],
-                    paidBy: 'Jeevan',
-                    shopName: '농협',
-                    category: 'dairy',
-                    description: 'කිරි 1L, චීස් 200g',
-                    amount: 1200,
-                    type: 'shared',
-                    forPerson: 'both'
-                },
-                {
-                    date: new Date().toISOString().split('T')[0],
-                    paidBy: 'Sachin',
-                    shopName: '월드푸드',
-                    category: 'other',
-                    description: 'සචින්ගේ පුද්ගලික බිස්කට්',
-                    amount: 500,
-                    type: 'personal',
-                    forPerson: 'Sachin'
-                },
-                {
-                    date: new Date().toISOString().split('T')[0],
-                    paidBy: 'Jeevan',
-                    shopName: '대농',
-                    category: 'other',
-                    description: 'ජීවන්ගේ පුද්ගලික චොකලට්',
-                    amount: 300,
-                    type: 'personal',
-                    forPerson: 'Jeevan'
-                }
-            ];
-            
-            // උදාහරණ වියදම් එකතු කරන්න
-            exampleExpenses.forEach(expense => {
-                const dateObj = new Date(expense.date);
-                expenses.push({
-                    id: Date.now() + Math.random(),
-                    date: expense.date,
-                    month: dateObj.getMonth(),
-                    year: dateObj.getFullYear(),
-                    paidBy: expense.paidBy,
-                    shopName: expense.shopName,
-                    category: expense.category,
-                    description: expense.description,
-                    amount: expense.amount,
-                    type: expense.type,
-                    forPerson: expense.forPerson
-                });
-            });
-            
-            // දත්ත යාවත්කාලීන කරන්න
-            updateCurrentMonthExpensesDetailed();
-            updateMonthSummary();
-            updateBalances();
-            updateFriendCards();
-            updateShopMonthlyTotals();
-            updateShopSummary();
-        }
-        
-        // සියලු දත්ත යළි පිහිටුවීම
-        function resetAllData() {
-            if (expenses.length === 0 || confirm('ඔබට සියලු වියදම් ඉවත් කිරීමට අවශ්‍යද? මෙය ආපසු හැරවිය නොහැක.')) {
-                expenses = [];
-                payments = [];
-                updateCurrentMonthExpensesDetailed();
-                updateAllExpenses();
-                updateMonthSummary();
-                updateMonthlySummary();
-                updateOverallSummary();
-                updatePayments();
-                updateBalances();
-                updateFriendCards();
-                updateShopMonthlyTotals();
-                updateShopSummary();
-                clearForm();
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('splitsync_data');
+            if (saved) {
+                const data = JSON.parse(saved);
+                transactions = data.transactions || [];
+                jeewanSharedBalance = data.jeewanSharedBalance || 0;
+                sachinSharedBalance = data.sachinSharedBalance || 0;
+                jeewanPersonalTotal = data.jeewanPersonalTotal || 0;
+                sachinPersonalTotal = data.sachinPersonalTotal || 0;
             }
         }
-        
-        // ඉසව් සවි කරන්න
-        addExpenseBtn.addEventListener('click', addExpense);
-        clearFormBtn.addEventListener('click', clearForm);
-        addPaymentBtn.addEventListener('click', openPaymentModal);
-        prevMonthBtn.addEventListener('click', prevMonth);
-        nextMonthBtn.addEventListener('click', nextMonth);
-        todayMonthBtn.addEventListener('click', goToTodayMonth);
-        resetAllBtn.addEventListener('click', resetAllData);
-        savePaymentBtn.addEventListener('click', savePayment);
-        cancelPaymentBtn.addEventListener('click', function() {
-            paymentModal.style.display = 'none';
-        });
-        
-        // Enter යතුර එබුවාම වියදමක් එකතු කරන්න
-        expenseDescriptionInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                addExpense();
+
+        // Close modal when clicking outside
+        document.getElementById('modal-overlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
             }
         });
-        
-        expenseAmountInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                addExpense();
-            }
-        });
-        
-        // පිටුව පූරණය වූ විට ආරම්භ කරන්න
-        window.addEventListener('load', initialize);
     </script>
 </body>
 </html>
