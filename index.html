@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="si">
 <head>
@@ -8,6 +9,117 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    
+    <!-- Firebase Module Script -->
+    <script type="module" id="firebase-module">
+      import { db } from "./firebase.js";
+      import { 
+        collection, 
+        addDoc, 
+        getDocs,
+        deleteDoc,
+        doc,
+        query,
+        orderBy,
+        Timestamp,
+        onSnapshot 
+      } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+      // Global Firebase functions
+      window.firebaseAddTransaction = async function(date, buyer, shop, amount, type, description) {
+        try {
+          const transaction = {
+            date: Timestamp.fromDate(new Date(date)),
+            buyer,
+            shop,
+            amount: Number(amount),
+            type,
+            description: description || '',
+            splitAmount: type === 'Shared' ? Math.round(Number(amount) / 2) : 0,
+            createdAt: Timestamp.now()
+          };
+
+          const docRef = await addDoc(collection(db, "transactions"), transaction);
+          
+          // Local state යාවත්කාලීන කරන්න
+          const localTransaction = {
+            id: docRef.id,
+            date: date,
+            buyer: transaction.buyer,
+            shop: transaction.shop,
+            amount: transaction.amount,
+            type: transaction.type,
+            description: transaction.description,
+            splitAmount: transaction.splitAmount,
+            jeewanSharedBalance: 0,
+            sachinSharedBalance: 0
+          };
+          
+          // Realtime update සඳහා
+          loadTransactionsFromFirebase();
+          
+          showToast('දත්ත Firebase වෙත සාර්ථකව සුරැකුණි! 🔥', 'success');
+          return localTransaction;
+        } catch (error) {
+          console.error("Error adding transaction: ", error);
+          showToast('දත්ත සුරැකීමට අපොහොසත් විය', 'error');
+          return null;
+        }
+      };
+
+      window.firebaseGetTransactions = async function() {
+        try {
+          const q = query(collection(db, "transactions"), orderBy("createdAt", "desc"));
+          const querySnapshot = await getDocs(q);
+          
+          const transactions = [];
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            transactions.push({
+              id: doc.id,
+              date: data.date.toDate().toISOString().split('T')[0],
+              buyer: data.buyer,
+              shop: data.shop,
+              amount: data.amount,
+              type: data.type,
+              description: data.description,
+              splitAmount: data.splitAmount
+            });
+          });
+          
+          return transactions;
+        } catch (error) {
+          console.error("Error getting transactions: ", error);
+          return [];
+        }
+      };
+
+      window.firebaseDeleteTransaction = async function(id) {
+        try {
+          await deleteDoc(doc(db, "transactions", id));
+          showToast('ගනුදෙනුව Firebase වෙතින් මකා ඇත! 🔥', 'success');
+          return true;
+        } catch (error) {
+          console.error("Error deleting transaction: ", error);
+          showToast('ගනුදෙනුව මැකීමට අපොහොසත් විය', 'error');
+          return false;
+        }
+      };
+
+      // Realtime updates සඳහා
+      window.setupFirebaseListener = function() {
+        const q = query(collection(db, "transactions"), orderBy("createdAt", "desc"));
+        
+        onSnapshot(q, (snapshot) => {
+          console.log("Firebase realtime update received!");
+          loadTransactionsFromFirebase();
+        });
+      };
+
+      // Initialize Firebase listener
+      setupFirebaseListener();
+    </script>
+    
     <style>
         :root {
             --primary: #0a0f1e;
@@ -1420,7 +1532,7 @@
         let currentFilter = 'all';
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             loadFromLocalStorage();
             setupNavigation();
             setupFilterButtons();
@@ -1428,6 +1540,10 @@
             setupPaymentForm();
             setupBillForm();
             setupDatePicker();
+            
+            // Firebase වලින් දත්ත ලබාගන්න
+            await loadTransactionsFromFirebase();
+            
             updateUI();
         });
 
@@ -1477,7 +1593,7 @@
 
         // Form Submission
         function setupExpenseForm() {
-            document.getElementById('expense-form').addEventListener('submit', function(e) {
+            document.getElementById('expense-form').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
                 const date = document.getElementById('date').value;
@@ -1487,7 +1603,7 @@
                 const type = document.getElementById('type').value;
                 const description = document.getElementById('description').value;
                 
-                addTransaction(date, buyer, shop, amount, type, description);
+                await addTransaction(date, buyer, shop, amount, type, description);
                 
                 showToast('වියදම සාර්ථකව එකතු කරන ලදී!', 'success');
                 resetForm();
@@ -1496,7 +1612,7 @@
 
         // Payment Form Submission
         function setupPaymentForm() {
-            document.getElementById('payment-form').addEventListener('submit', function(e) {
+            document.getElementById('payment-form').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
                 const date = document.getElementById('payment-date').value;
@@ -1504,10 +1620,7 @@
                 const amount = parseInt(document.getElementById('payment-amount').value);
                 const description = document.getElementById('payment-description').value || 'ගෙවීම';
                 
-                const fromSinhala = from === 'Jeewan' ? 'ජීවන්' : 'සචින්';
-                const toSinhala = from === 'Jeewan' ? 'සචින්' : 'ජීවන්';
-                
-                addTransaction(date, from, 'payment', amount, 'Payment', description || `${fromSinhala} සිට ${toSinhala} දක්වා ගෙවීම`);
+                await addTransaction(date, from, 'payment', amount, 'Payment', description);
                 
                 showToast('ගෙවීම සාර්ථකව පටිගත කරන ලදී!', 'success');
                 resetPaymentForm();
@@ -1537,7 +1650,7 @@
                     const file = fileInput.files[0];
                     const reader = new FileReader();
                     
-                    reader.onload = function(event) {
+                    reader.onload = async function(event) {
                         const billData = {
                             id: Date.now(),
                             date,
@@ -1554,7 +1667,7 @@
                         bills.push(billData);
                         
                         // Also add to transactions
-                        addTransaction(date, buyer, shop, amount, type, description);
+                        await addTransaction(date, buyer, shop, amount, type, description);
                         
                         saveToLocalStorage();
                         updateUI();
@@ -1623,8 +1736,61 @@
             }
         }
 
-        // Core Transaction Logic
-        function addTransaction(date, buyer, shop, amount, type, description) {
+        // Core Transaction Logic - Firebase සමඟ
+        async function addTransaction(date, buyer, shop, amount, type, description) {
+            // Firebase වෙත දත්ත යවන්න
+            const firebaseTransaction = await firebaseAddTransaction(date, buyer, shop, amount, type, description);
+            
+            if (!firebaseTransaction) {
+                // Firebase වලදී දෝෂයක් සිදුවුවහොත්, local storage පමණක් භාවිතා කරන්න
+                console.log("Using local storage as fallback...");
+                addTransactionToLocal(date, buyer, shop, amount, type, description);
+                return;
+            }
+            
+            // Firebase වලින් ලැබුණු transaction භාවිතා කරන්න
+            const transaction = firebaseTransaction;
+            
+            // Update balances based on transaction type
+            if (type === 'Shared') {
+                const splitAmount = Math.round(amount / 2);
+                if (buyer === 'Jeewan') {
+                    jeewanSharedBalance += splitAmount;
+                    sachinSharedBalance -= splitAmount;
+                } else {
+                    sachinSharedBalance += splitAmount;
+                    jeewanSharedBalance -= splitAmount;
+                }
+            } else if (type === 'Personal') {
+                if (buyer === 'Jeewan') {
+                    jeewanPersonalTotal += amount;
+                } else {
+                    sachinPersonalTotal += amount;
+                }
+            } else if (type === 'Payment') {
+                // Payment logic: buyer pays to the other person
+                if (buyer === 'Jeewan') {
+                    // Jeewan pays Sachin
+                    jeewanSharedBalance += amount;
+                    sachinSharedBalance -= amount;
+                } else {
+                    // Sachin pays Jeewan
+                    sachinSharedBalance += amount;
+                    jeewanSharedBalance -= amount;
+                }
+            }
+
+            // Store current balances in transaction
+            transaction.jeewanSharedBalance = jeewanSharedBalance;
+            transaction.sachinSharedBalance = sachinSharedBalance;
+
+            transactions.unshift(transaction);
+            saveToLocalStorage();
+            updateUI();
+        }
+
+        // Local storage fallback function
+        function addTransactionToLocal(date, buyer, shop, amount, type, description) {
             const transaction = {
                 id: Date.now(),
                 date,
@@ -1674,25 +1840,33 @@
             transactions.unshift(transaction);
             saveToLocalStorage();
             updateUI();
+            showToast('වියදම local storage වෙත සුරකින ලදී', 'info');
         }
 
-        function deleteTransaction(id) {
+        async function deleteTransaction(id) {
             showModal(
                 'ගනුදෙනුව මකන්න',
-                'මෙම ගනුදෙනුව මකා දැමීමට අවශ්‍ය බව විශ්වාසද? මෙය සියලු ශේෂ නැවත ගණනය කරනු ඇත.',
-                () => {
+                'මෙම ගනුදෙනුව මකා දැමීමට අවශ්‍ය බව විශ්වාසද? මෙය Firebase සහ local storage යන දෙකෙන්ම මකනු ඇත.',
+                async () => {
                     const index = transactions.findIndex(t => t.id === id);
                     if (index === -1) return;
 
-                    // Remove transaction
-                    transactions.splice(index, 1);
-
-                    // Recalculate all balances from scratch
-                    recalculateBalances();
+                    // Firebase වෙතින් මකන්න
+                    const firebaseSuccess = await firebaseDeleteTransaction(id);
                     
+                    if (!firebaseSuccess) {
+                        showToast('Firebase වෙතින් මැකීමට අපොහොසත් විය. Local storage පමණක් යාවත්කාලීන කරනු ලැබේ.', 'error');
+                    }
+                    
+                    // Local storage වෙතින් මකන්න
+                    transactions.splice(index, 1);
+                    recalculateBalances();
                     saveToLocalStorage();
                     updateUI();
-                    showToast('ගනුදෙනුව මකා දමන ලදී', 'success');
+                    
+                    if (firebaseSuccess) {
+                        showToast('ගනුදෙනුව සියලු තැන් වලින් මකා දමන ලදී', 'success');
+                    }
                 }
             );
         }
@@ -1864,7 +2038,7 @@
                     <td>${getTypeBadge(t.type)}</td>
                     <td>${t.description || '-'}</td>
                     <td>
-                        <button class="delete-btn" onclick="deleteTransaction(${t.id})">🗑️ මකන්න</button>
+                        <button class="delete-btn" onclick="deleteTransaction('${t.id}')">🗑️ මකන්න</button>
                     </td>
                 </tr>
             `).join('');
@@ -1924,7 +2098,7 @@
                         <td class="amount-cell" style="color: var(--success);">${formatCurrency(t.amount)}</td>
                         <td>${t.description || '-'}</td>
                         <td>
-                            <button class="delete-btn" onclick="deleteTransaction(${t.id})">🗑️ මකන්න</button>
+                            <button class="delete-btn" onclick="deleteTransaction('${t.id}')">🗑️ මකන්න</button>
                         </td>
                     </tr>
                 `;
@@ -2024,7 +2198,7 @@
             document.getElementById('date').value = today;
         }
 
-        function makeQuickPayment(from, to) {
+        async function makeQuickPayment(from, to) {
             let owedAmount;
             
             if (from === 'Jeewan') {
@@ -2060,7 +2234,7 @@
             }
             
             const today = new Date().toISOString().split('T')[0];
-            addTransaction(today, from, 'payment', amount, 'Payment', `ක්ෂණික ගෙවීම ${fromSinhala} සිට ${toSinhala} දක්වා`);
+            await addTransaction(today, from, 'payment', amount, 'Payment', `ක්ෂණික ගෙවීම ${fromSinhala} සිට ${toSinhala} දක්වා`);
             
             showToast(`₩${formatNumber(amount)} ගෙවීම් පටිගත කරන ලදී!`, 'success');
         }
@@ -2083,11 +2257,11 @@
             );
         }
 
-        function loadSampleData() {
+        async function loadSampleData() {
             showModal(
                 'නිදර්ශන දත්ත ලබා ගන්න',
                 'මෙය නිදර්ශන ගනුදෙනු එකතු කරනු ඇත. ඔබගේ පවතින දත්ත රඳවා ගනු ඇත.',
-                () => {
+                async () => {
                     const today = new Date();
                     const dates = [];
                     for (let i = 0; i < 10; i++) {
@@ -2096,16 +2270,16 @@
                         dates.push(date.toISOString().split('T')[0]);
                     }
                     
-                    addTransaction(dates[0], 'Jeewan', '월드푸드', 20000, 'Shared', 'බත් සහ එළවළු');
-                    addTransaction(dates[1], 'Sachin', '대농', 15000, 'Shared', 'පළතුරු සහ නැළවිලි');
-                    addTransaction(dates[2], 'Jeewan', '통진', 8000, 'Personal', 'පෞද්ගලික අහාර');
-                    addTransaction(dates[3], 'Sachin', '농협', 12000, 'Shared', 'බිත්තර සහ කිරි');
-                    addTransaction(dates[4], 'Jeewan', 'payment', 3500, 'Payment', 'වැටුප් සමනය');
-                    addTransaction(dates[5], 'Sachin', 'වෙනත්', 25000, 'Shared', 'සතිපතා ගෘහස්ථ භාණ්ඩ');
-                    addTransaction(dates[6], 'Sachin', '월드푸드', 5000, 'Personal', 'නැළවිලි');
-                    addTransaction(dates[7], 'Jeewan', '대농', 18000, 'Shared', 'මස් සහ මාළු');
-                    addTransaction(dates[8], 'Sachin', 'payment', 7000, 'Payment', 'ණය ගෙවීම');
-                    addTransaction(dates[9], 'Jeewan', 'වෙනත්', 3000, 'Personal', 'ප්‍රවාහන');
+                    await addTransaction(dates[0], 'Jeewan', '월드푸드', 20000, 'Shared', 'බත් සහ එළවළු');
+                    await addTransaction(dates[1], 'Sachin', '대농', 15000, 'Shared', 'පළතුරු සහ නැළවිලි');
+                    await addTransaction(dates[2], 'Jeewan', '통진', 8000, 'Personal', 'පෞද්ගලික අහාර');
+                    await addTransaction(dates[3], 'Sachin', '농협', 12000, 'Shared', 'බිත්තර සහ කිරි');
+                    await addTransaction(dates[4], 'Jeewan', 'payment', 3500, 'Payment', 'වැටුප් සමනය');
+                    await addTransaction(dates[5], 'Sachin', 'වෙනත්', 25000, 'Shared', 'සතිපතා ගෘහස්ථ භාණ්ඩ');
+                    await addTransaction(dates[6], 'Sachin', '월드푸드', 5000, 'Personal', 'නැළවිලි');
+                    await addTransaction(dates[7], 'Jeewan', '대농', 18000, 'Shared', 'මස් සහ මාළු');
+                    await addTransaction(dates[8], 'Sachin', 'payment', 7000, 'Payment', 'ණය ගෙවීම');
+                    await addTransaction(dates[9], 'Jeewan', 'වෙනත්', 3000, 'Personal', 'ප්‍රවාහන');
                     
                     showToast('නිදර්ශන දත්ත සාර්ථකව ලබා ගන්නා ලදී!', 'success');
                 }
@@ -2162,6 +2336,28 @@
                 sachinSharedBalance = data.sachinSharedBalance || 0;
                 jeewanPersonalTotal = data.jeewanPersonalTotal || 0;
                 sachinPersonalTotal = data.sachinPersonalTotal || 0;
+            }
+        }
+
+        // Firebase Functions
+        async function loadTransactionsFromFirebase() {
+            try {
+                const firebaseTransactions = await firebaseGetTransactions();
+                
+                if (firebaseTransactions.length > 0) {
+                    // Firebase transactions අනුව local state යාවත්කාලීන කරන්න
+                    transactions = firebaseTransactions;
+                    
+                    // Balances නැවත ගණනය කරන්න
+                    recalculateBalances();
+                    
+                    // UI යාවත්කාලීන කරන්න
+                    updateUI();
+                    
+                    console.log("Transactions loaded from Firebase:", firebaseTransactions.length);
+                }
+            } catch (error) {
+                console.error("Error loading from Firebase:", error);
             }
         }
 
